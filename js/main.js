@@ -28,7 +28,7 @@ $(document).ready(function() {
 
     target = $(target);
     $('html, body').stop().animate({
-      'scrollTop': target.offset().top - 80
+      'scrollTop': target.offset().top - 10
     }, 500, 'swing', function() {
       window.location.hash = target.selector;
       $(document).on("scroll", onScroll);
