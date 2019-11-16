@@ -4,7 +4,7 @@ body {
 	padding-left: 28%;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 667px) {
 	body {
 		font-family: Helvetica;
 		padding-right: 0;
