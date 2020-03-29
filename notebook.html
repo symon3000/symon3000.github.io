@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" type="text/css" href="notebook.css">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="turn.js"></script>
+	<style type="text/css">
+
+		/*#flipbook {
+			width:500;
+			height:669;
+		}*/
+
+		#flipbook .turn-page{
+			background-color:#ddd;
+			background-size:100% 100%;
+		}
+
+	</style>
+	<title>You read me so well.</title>
+</head>
+<body>
+	<div class="container">
+		<div>What's over here?</div>
+		<div style="text-align:center">
+			<div style="display:inline-block" id="flipbook">
+				<div class="hard" style="background-image:url('nbimages/1.png');"></div>
+				<div class="hard" style="background-image:url('nbimages/3.png');"></div>
+				<div style="background-image:url('nbimages/2.png');"></div>
+				<div style="background-image:url('nbimages/3.png');"></div>
+				<div style="background-image:url('nbimages/4.png'); border-left: 1px solid black;"></div>
+				<div style="background-image:url('nbimages/5.png');"></div>
+				<div style="background-image:url('nbimages/6.png');"></div>
+				<div style="background-image:url('nbimages/7.png');"></div>
+				<div style="background-image:url('nbimages/8.png');"></div>
+				<div style="background-image:url('nbimages/9.png');"></div>
+				<div style="background-image:url('nbimages/10.png');"></div>
+				<div style="background-image:url('nbimages/11.png');"></div>
+				<div style="background-image:url('nbimages/12.png');"></div>
+				<div style="background-image:url('nbimages/13.png');"></div>
+				<div style="background-image:url('nbimages/14.png');"></div>
+				<div style="background-image:url('nbimages/15.png');"></div>
+				<div style="background-image:url('nbimages/16.png');"></div>
+				<div style="background-image:url('nbimages/17.png');"></div>
+				<div style="background-image:url('nbimages/18.png');"></div>
+				<div style="background-image:url('nbimages/19.png');"></div>
+				<div style="background-image:url('nbimages/20.png');"></div>
+				<div style="background-image:url('nbimages/21.png');"></div>
+				<div style="background-image:url('nbimages/22.png');"></div>
+				<div style="background-image:url('nbimages/23.png');"></div>
+				<div style="background-image:url('nbimages/24.png');"></div>
+				<div style="background-image:url('nbimages/25.png');"></div>
+				<div style="background-image:url('nbimages/26.png');"></div>
+				<div style="background-image:url('nbimages/27.png');"></div>
+				<div style="background-image:url('nbimages/28.png');"></div>
+				<div style="background-image:url('nbimages/29.png');"></div>
+				<div style="background-image:url('nbimages/30.png');"></div>
+				<div style="background-image:url('nbimages/31.png');"></div>
+			</div>
+		</div>
+		<div>And what's over here?</div>
+	</div>
+
+
+
+<script type="text/javascript">
+
+	$("#flipbook").turn({
+		width: 1000,
+		height: 669,
+		autoCenter: false,
+		gradients: true
+	});
+
+
+	$(window).bind('keydown', function(e){
+
+		if(e.keyCode==37)
+			$('#flipbook').turn('previous');
+		else if (e.keyCode==39)
+			$('#flipbook').turn('next');
+	});
+
+</script>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</body>
+</html>
