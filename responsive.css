@@ -3,10 +3,62 @@ html, body {
     height: 100%;
 }
 
-
 body.hide-overflow {
     overflow: hidden;
 }
+
+.welcome {
+    position: fixed;
+    height: 100%;
+    width: 25vw;
+    top: 40vh;
+    left: 23vw;
+    overflow-x: hidden;
+    font-family: monospace, Courier;
+    font-size: 1.2vw;
+}
+
+.last {
+    background-image: url('3.png');
+    background-size: 100%;
+}
+
+.lastText {
+    font-family: monospace, Courier;
+    font-size: 1.2vw;
+    text-align: left;
+    width: 25vw;
+    margin-left: 20%;
+}
+
+.goodbye {
+    position: fixed;
+    height: 100%;
+    width: 28vw;
+    top: 40vh;
+    right: 20vw;
+    overflow-x: hidden;
+    font-family: monospace, Courier;
+    font-size: 1.2vw;
+}
+
+/*Center Fold*/
+
+/*.book .even {
+    background-image:-webkit-linear-gradient(left, #fff 95%, #dadada 100%);
+    background-image:-moz-linear-gradient(left, #fff 95%, #dadada 100%);
+    background-image:-ms-linear-gradient(left, #fff 95%, #dadada 100%);
+    background-image:-o-linear-gradient(left, #fff 95%, #dadada 100%);
+    background-image:linear-gradient(left, #fff 95%, #dadada 100%);
+}
+
+.book .odd {
+    background-image:-webkit-linear-gradient(right, #fff 95%, #cacaca 100%);
+    background-image:-moz-linear-gradient(right, #fff 95%, #cacaca 100%);
+    background-image:-ms-linear-gradient(right, #fff 95%, #cacaca 100%);
+    background-image:-o-linear-gradient(right, #fff 95%, #cacaca 100%);
+    background-image:linear-gradient(right, #fff 95%, #cacaca 100%);
+}*/
 
 /* helpers */
 
