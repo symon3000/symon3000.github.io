@@ -42,9 +42,29 @@ body.hide-overflow {
     font-size: 1.2vw;
 }
 
+/*Max's center shadow*/
+
+.rightPage {
+    position: absolute;
+    left: 0;
+    /*background-image:linear-gradient(left, #fff 95%, #000 100%);*/
+    opacity: .8;
+    background: linear-gradient(90deg, rgba(129,129,129,1) 50%, rgba(255,255,255,1) 50%);
+}
+
+.leftPage {
+    position: absolute;
+    right: 0;
+    /*background-image:linear-gradient(left, #fff 95%, #000 100%);*/
+    opacity: .8;
+    background: linear-gradient(270deg, rgba(129,129,129,1) 50%, rgba(255,255,255,1) 50%);
+}
+
+
 /*Center Fold*/
 
-/*.book .even {
+/*
+.book .even {
     background-image:-webkit-linear-gradient(left, #fff 95%, #dadada 100%);
     background-image:-moz-linear-gradient(left, #fff 95%, #dadada 100%);
     background-image:-ms-linear-gradient(left, #fff 95%, #dadada 100%);
