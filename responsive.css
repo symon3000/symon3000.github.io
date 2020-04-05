@@ -78,7 +78,7 @@ body.hide-overflow {
     background-image:-ms-linear-gradient(right, #fff 95%, #cacaca 100%);
     background-image:-o-linear-gradient(right, #fff 95%, #cacaca 100%);
     background-image:linear-gradient(right, #fff 95%, #cacaca 100%);*/
-}
+/*}*/
 /*
 .book .inner-gradient{
     background:-webkit-gradient(linear, left top, right top, color-stop(0, rgba(0, 0, 0, 0)), color-stop(0.3, rgba(0, 0, 0, 0.2)), color-stop(0.5, rgba(255, 255, 255, 0.2)) ) !important;
