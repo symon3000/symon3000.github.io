@@ -11,8 +11,8 @@ body.hide-overflow {
 .welcome {
     position: fixed;
     height: 100%;
-    width: 25vw;
-    top: 40vh;
+    width: 20vw;
+    top: 30vh;
     left: 23vw;
     overflow-x: hidden;
     font-family: monospace, Courier;
@@ -35,9 +35,9 @@ body.hide-overflow {
 .goodbye {
     position: fixed;
     height: 100%;
-    width: 28vw;
-    top: 40vh;
-    right: 20vw;
+    width: 22vw;
+    top: 30vh;
+    right: 23vw;
     overflow-x: hidden;
     font-family: monospace, Courier;
     font-size: 1.2vw;
