@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encourage Patrick to Write</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #34495e;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        img {
+            display: block;
+            max-width: 250px;
+            height: auto;
+            margin: 1rem auto;
+            border-radius: 5px;
+        }
+        .instructions-container {
+            max-width: 80%;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .instructions {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        .input-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        input[type="text"] {
+            width: 100%;
+            max-width: 80%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 1rem;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .messages {
+            margin: 1rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        }
+        .message {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eaeaea;
+            color: #2c3e50;
+        }
+        .message:last-child {
+            border-bottom: none;
+        }
+        @media (max-width: 768px) {
+            input[type="text"] {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Write to us, Patrick!</h1>
+    </header>
+    <img src="https://images.zola.com/1f997989-5a95-477d-89c0-2304abac16c3" alt="Patrick and his wife">
+    <div class="instructions-container">
+        <div class="instructions">
+            Leave some words of encouragement for our dear friend, the one and only Godfather of the Potpourri.
+        </div>
+    </div>
+    <div class="input-container">
+        <input type="text" id="message-input" placeholder="Write your message here...">
+        <button id="post-button">Post it!</button>
+    </div>
+    <div class="messages" id="messages"></div>
+
+    <script>
+        const postButton = document.getElementById('post-button');
+        const messageInput = document.getElementById('message-input');
+        const messages = document.getElementById('messages');
+
+        postButton.addEventListener('click', () => {
+            const message = messageInput.value.trim();
+            if (message !== '') {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message';
+                messageElement.textContent = message;
+                messages.prepend(messageElement);
+                messageInput.value = '';
+            }
+        });
+
+        messageInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                postButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
