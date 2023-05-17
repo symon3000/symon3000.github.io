@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* CSS for the photo grid */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-gap: 10px;
+    }
+
+    .photo-grid img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+
+    /* Responsive image sizing */
+    @media (min-width: 768px) {
+      .photo-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="photo-grid" id="photoGrid"></div>
+
+  <script>
+    // JavaScript to dynamically populate the photo grid
+
+    const photoGrid = document.getElementById("photoGrid");
+
+    // Loop through the range of photos and create image elements
+    for (let i = 1; i <= 34; i++) {
+      const fileName = `photo${i}.png`;
+      const img = document.createElement("img");
+      img.src = fileName;
+      photoGrid.appendChild(img);
+    }
+  </script>
+</body>
+</html>
