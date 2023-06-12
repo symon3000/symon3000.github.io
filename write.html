@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Dark Mode Text Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <style>
+    body {
+    background-color: #111;
+    color: #eee;
+    font-family: 'Quicksand', sans-serif;
+    line-height: 2;
+    }
+
+    #editor {
+        background-color: #222;
+        color: #ffe;
+        padding: 10px;
+        margin: 10vh auto;
+        /* Center the editor horizontally */
+        border-radius: 5px;
+        max-width: 800px;
+        /* Adjust the maximum width as desired */
+        width: 90%;
+        /* Take up 90% of the available width */
+        min-height: 80vh;
+        font-size: 15px;
+        outline: none;
+    }
+  </style>
+  <div id="editor" contenteditable="true"></div>
+  <script>
+    // Get the editor div element
+const editor = document.getElementById('editor');
+
+// Focus the editor on page load
+window.addEventListener('DOMContentLoaded', () => {
+    editor.focus();
+});
+  </script>
+</body>
+
+  
+</html>
