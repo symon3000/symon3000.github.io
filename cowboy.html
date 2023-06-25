@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Drive-In Cowboy</title>
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #333333;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    #audio-player {
+      margin-bottom: 20px;
+    }
+
+    #lyrics {
+      font-family: 'Times New Roman', serif;
+      font-size: 16px;
+      white-space: pre-line;
+      text-align: left;
+      margin: 0 auto;
+      max-width: 600px;
+    }
+
+    .chord {
+      font-weight: bold;
+      color: #ff6600;
+    }
+  </style>
+</head>
+<body>
+  <h1>Drive-In Cowboy</h1>
+
+  <!-- Audio Player -->
+  <audio id="audio-player" controls>
+    <source src="cowboy.m4a" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Lyrics with Chord Progression -->
+  <div id="lyrics">
+    <pre>
+    Verse 1:
+        
+    G
+    Went out to the drive-in
+          Am
+    The place I always go
+          D
+    On Friday nights, to see the sights
+          G
+    In all the picture shows
+      
+    G
+    Got there nice and early
+          Am
+    To claim my favorite spot
+          D
+    But it don't matter anymore
+          G
+    When no one's in the lot
+      
+    
+    Chorus:
+                C
+    Cuz I'm the last cowboy standing
+          G
+    The others left the scene
+    A7                          D
+    Nothin' left but memories projected on the screen
+                C
+    Cuz I'm the last cowboy standing
+          G
+    The others left the scene
+    D                C               G
+    Nothin' left but mem'ries on the screen
+      
+    
+    Verse 2:
+      G
+    Tune my little radio
+          Am
+    To 89.3
+          D
+    No country boys, just a buncha noise
+          G
+    To greet the moon and me
+    
+          G
+    No candy in the lobby
+          Am
+    No popcorn in the stand
+          D
+    No fountain coke, just a pack of smokes
+            G
+    And a warm beer in my hand
+      
+    
+    Chorus:
+                    C
+    Cuz I'm the last cowboy standing
+          G
+    The others left the scene
+    A7                          D
+    Nothin' left but memories projected on the screen
+                C
+    Cuz I'm the last cowboy standing
+          G
+    The others left the scene
+    D                C               G
+    Nothin' left but mem'ries on the screen
+      
+    
+    [Key change to A]
+      
+    
+    Verse 3:
+    A
+    Ridin' round from town to town
+            Bm
+    Kickin' bad guys out the door
+            E          
+    Gettin' kissed by girls as we dance and twirl
+            A
+    'til we can't stand up no more
+          A
+    Don't tell me that the ramblin' life
+        Bm
+    Is bound to take its toll
+            E
+    I'll be on the screen standin' tall and mean
+            A
+    When the credits start to roll
+    
+
+    Chorus (in A):
+                D
+    Cuz I'm the last cowboy standing
+        A
+    The others left the scene
+    B7                        E
+    Nothin' left but memories projected on the screen
+                D
+    Cuz I'm the last cowboy standing
+        A
+    The others left the scene
+    E                D               A
+    Nothin' left but mem'ries on the screen
+      
+    </pre>
+  </div>
+
+  <script>
+    // JavaScript for highlighting chords in the lyrics
+    const lyricsElement = document.getElementById('lyrics');
+    const chords = lyricsElement.getElementsByTagName('pre')[0].getElementsByTagName('span');
+
+    for (let i = 0; i < chords.length; i++) {
+      const chord = chords[i].innerText;
+      const regex = new RegExp(chord, 'g');
+      const replacedText = lyricsElement.innerHTML.replace(regex, `<span class="chord">${chord}</span>`);
+      lyricsElement.innerHTML = replacedText;
+    }
+  </script>
+</body>
+</html>
