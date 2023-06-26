@@ -2,13 +2,14 @@
 <html>
 <head>
   <title>Drive-In Cowboy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       background-color: #f5f5f5;
       color: #333333;
       font-family: Arial, sans-serif;
       text-align: center;
-      padding: 20px;
+      padding: 10px;
       margin: 0;
     }
 
@@ -19,20 +20,34 @@
 
     #audio-player {
       margin-bottom: 20px;
+      width: 100%;
+      max-width: 400px;
     }
 
     #lyrics {
-      font-family: 'Times New Roman', serif;
+      font-family: Arial, sans-serif;
       font-size: 16px;
       white-space: pre-line;
       text-align: left;
       margin: 0 auto;
-      max-width: 600px;
+      max-width: 90%;
+      overflow-wrap: break-word;
     }
 
     .chord {
       font-weight: bold;
       color: #ff6600;
+    }
+
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 20px;
+      }
+
+      #lyrics {
+        font-size: 14px;
+        max-width: 100%;
+      }
     }
   </style>
 </head>
