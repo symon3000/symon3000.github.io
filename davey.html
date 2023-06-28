@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Davey Dove Deep</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #333333;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    #audio-player {
+      margin-bottom: 20px;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    #lyrics {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      white-space: pre-line;
+      text-align: left;
+      margin: 0 auto;
+      max-width: 90%;
+      overflow-wrap: break-word;
+    }
+
+    .chord {
+      font-weight: bold;
+      color: #ff6600;
+    }
+
+    @media (max-width: 320px) {
+      h1 {
+        font-size: 20px;
+      }
+
+      #lyrics {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Davey Dove Deep</h1>
+  <h4>Jackie & Coop</h4>
+
+  <!-- Audio Player -->
+  <audio id="audio-player" controls controlsList="nodownload">
+    <source src="davey.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Lyrics with Chord Progression -->
+  <div id="lyrics">
+    <pre>
+    Verse 1:
+        
+    C               Am
+    In the heart of old PA
+    G                  F
+    On the hottest ever summer day
+    C                          Am
+    Somethin' happened at the swimming hole
+        F            Dm     C
+    But Davey won't tell a soul
+      
+    C                      Am
+    There's a cliff there against the sky
+    G                    F
+    Fifty feet up and at least as wide
+    C                        Am
+    Dave would climb up and then he would dive
+          F          Dm        C        
+    His guts were tougher than iron
+
+    C                  Am
+    On that day he said he had a plan
+    G                        F
+    He finally jumped and he threw out his hands
+    C              Am
+    Hit the water, kicked and he swam
+        F      Dm        C
+    He hit the water and swam
+      
+    
+    Chorus:
+      
+    C                    Am
+    Davey dove deep that day
+            G                  Fm
+    Yeah he tried to touch the bottom
+                          C          Am
+    When he came back to breathe, he said
+              G            Fm
+    That the water almost got him
+                C          Am
+    Got him to stay down deep
+          G                 Fm
+    Where no one would ever find him
+                        C          Am
+    But he came back to me, so he said
+      C
+    Anyway
+      
+    
+    Verse 2:
+      
+      C               Am
+    Drying off, we went back to town
+    G                      F
+    Folks saw Dave and they gathered 'round
+    C                    Am
+    Asked him, "How high was it today?"
+          F      Dm     C
+    But Davey wouldn't say
+    
+    C                        Am
+    He played it coy with a wink and a smile
+    G                 F
+    He never did tell just how high
+    C                  Am
+    To get the story, they didn't know
+        F      Dm       C
+    To ask him just how low
+      
+    
+    Chorus:
+      
+    C                    Am
+    Davey dove deep that day
+            G                  Fm
+    Yeah he tried to touch the bottom
+                          C          Am
+    When he came back to breathe, he said
+              G            Fm
+    That the water almost got him
+                C          Am
+    Got him to stay down deep
+          G                 Fm
+    Where no one would ever find him
+                        C          Am
+    But he came back to me, so he said
+      C
+    Anyway
+   
+      
+    </pre>
+  </div>
+
+  <script>
+    // JavaScript for highlighting chords in the lyrics
+    const lyricsElement = document.getElementById('lyrics');
+    const chords = lyricsElement.getElementsByTagName('pre')[0].getElementsByTagName('span');
+
+    for (let i = 0; i < chords.length; i++) {
+      const chord = chords[i].innerText;
+      const regex = new RegExp(chord, 'g');
+      const replacedText = lyricsElement.innerHTML.replace(regex, `<span class="chord">${chord}</span>`);
+      lyricsElement.innerHTML = replacedText;
+    }
+  </script>
+</body>
+</html>
