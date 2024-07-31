@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Jam Session Layout</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.139.2/build/three.module.js",
+                "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.139.2/examples/jsm/controls/OrbitControls.js",
+                "three/examples/jsm/loaders/FontLoader": "https://unpkg.com/three@0.139.2/examples/jsm/loaders/FontLoader.js",
+                "three/examples/jsm/geometries/TextGeometry": "https://unpkg.com/three@0.139.2/examples/jsm/geometries/TextGeometry.js"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+        import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
+        import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
+
+        // Set up scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Add OrbitControls
+        const controls = new OrbitControls(camera, renderer.domElement);
+
+        // Add lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        // Create room (without floor)
+        const roomGeometry = new THREE.BoxGeometry(10, 5, 8);
+        const roomMaterial = new THREE.MeshPhongMaterial({ color: 0xcccccc, side: THREE.BackSide });
+        const room = new THREE.Mesh(roomGeometry, roomMaterial);
+        room.position.y = 2.5;  // Move the room up to accommodate the separate floor
+        scene.add(room);
+
+        // Create floor as a separate object
+        const floorGeometry = new THREE.PlaneGeometry(10, 8);
+        const floorMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513, side: THREE.DoubleSide });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -0.01;  // Slightly below 0 to avoid z-fighting with the room edges
+        scene.add(floor);
+
+        // Function to create a player
+        function createPlayer(x, z, color, name) {
+            const geometry = new THREE.CylinderGeometry(0.3, 0.3, 1.8, 32);
+            const material = new THREE.MeshPhongMaterial({ color: color });
+            const player = new THREE.Mesh(geometry, material);
+            player.position.set(x, 0.9, z);  // Adjust Y position to sit on the new floor
+            scene.add(player);
+
+            // Add label
+            createLabel(name, x, 2, z);
+        }
+
+        // Create players
+        createPlayer(0, 2, 0x00ff00, 'Miguel'); // Drums
+        createPlayer(2, 1, 0xff0000, 'Max'); // Keys
+        createPlayer(-2, 1, 0x0000ff, 'Hank'); // Bass
+        createPlayer(-3, -1, 0xff00ff, 'Hazlett'); // Guitar
+        createPlayer(-1, -2, 0xffff00, 'Dale'); // Guitar
+        createPlayer(1, -2, 0x00ffff, 'Johnny'); // Guitar
+        createPlayer(3, -1, 0xff8000, 'Schramm'); // Sax/Perc
+
+        // Create amps
+        function createAmp(x, z) {
+            const geometry = new THREE.BoxGeometry(0.5, 1, 0.5);
+            const material = new THREE.MeshPhongMaterial({ color: 0x333333 });
+            const amp = new THREE.Mesh(geometry, material);
+            amp.position.set(x, 0.5, z);  // Adjust Y position to sit on the new floor
+            scene.add(amp);
+
+            // Add label
+            createLabel('Amp', x, 1.3, z);
+        }
+
+        createAmp(-4.5, 3.5);
+        createAmp(-4.5, -3.5);
+        createAmp(4.5, 3.5);
+        createAmp(4.5, -3.5);
+
+        // Function to create text labels (updated for better visibility)
+        function createLabel(text, x, y, z) {
+            const loader = new FontLoader();
+            loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
+                const geometry = new TextGeometry(text, {
+                    font: font,
+                    size: 0.2,
+                    height: 0.05,
+                });
+                const material = new THREE.MeshPhongMaterial({color: 0x000000});
+                const textMesh = new THREE.Mesh(geometry, material);
+                textMesh.position.set(x, y, z);
+                
+                // Add outline
+                const outlineMaterial = new THREE.MeshPhongMaterial({color: 0xffffff, side: THREE.BackSide});
+                const outlineMesh = new THREE.Mesh(geometry, outlineMaterial);
+                outlineMesh.position.set(x, y, z);
+                outlineMesh.scale.multiplyScalar(1.05);
+                
+                scene.add(textMesh);
+                scene.add(outlineMesh);
+            });
+        }
+
+        // Set camera position
+        camera.position.set(0, 5, 15);
+        camera.lookAt(0, 0, 0);
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle window resizing
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+</body>
+</html>
