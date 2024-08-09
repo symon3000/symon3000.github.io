@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Money Stack</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #info { position: absolute; top: 10px; width: 100%; text-align: center; z-index: 100; display: block; }
+        #moneyInput { font-size: 18px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <input type="number" id="moneyInput" placeholder="Enter amount in dollars">
+        <button onclick="updateMoneyStack()">Update Stack</button>
+        <button id="arButton" style="display: none;">Start AR</button>
+    </div>
+    <script>
+        let scene, camera, renderer, moneyStack;
+        let xrSession = null;
+
+        async function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const light = new THREE.PointLight(0xffffff, 1, 100);
+            light.position.set(0, 0, 10);
+            scene.add(light);
+
+            camera.position.z = 5;
+
+            moneyStack = new THREE.Group();
+            scene.add(moneyStack);
+
+            if ('xr' in navigator) {
+                const arButton = document.getElementById('arButton');
+                arButton.style.display = 'block';
+                arButton.addEventListener('click', onARButtonClick);
+            }
+
+            animate();
+        }
+
+        function createBill(height) {
+            const billGeometry = new THREE.BoxGeometry(0.1, 0.001, 0.05);
+            const billMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+            const bill = new THREE.Mesh(billGeometry, billMaterial);
+            bill.position.y = height;
+            return bill;
+        }
+
+        function updateMoneyStack() {
+            const amount = document.getElementById('moneyInput').value;
+            const billCount = Math.floor(amount / 100);
+
+            moneyStack.clear();
+
+            for (let i = 0; i < billCount; i++) {
+                const bill = createBill(i * 0.001);
+                moneyStack.add(bill);
+            }
+        }
+
+        function animate() {
+            renderer.setAnimationLoop((timestamp, frame) => {
+                if (xrSession) {
+                    renderer.render(scene, camera);
+                } else {
+                    moneyStack.rotation.y += 0.01;
+                    renderer.render(scene, camera);
+                }
+            });
+        }
+
+        async function onARButtonClick() {
+            if (!xrSession) {
+                xrSession = await navigator.xr.requestSession('immersive-ar', {
+                    requiredFeatures: ['hit-test'],
+                    optionalFeatures: ['dom-overlay'],
+                    domOverlay: { root: document.getElementById('info') }
+                });
+
+                renderer.xr.enabled = true;
+                renderer.xr.setReferenceSpaceType('local');
+                await renderer.xr.setSession(xrSession);
+
+                xrSession.addEventListener('end', () => {
+                    xrSession = null;
+                });
+            } else {
+                await xrSession.end();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
