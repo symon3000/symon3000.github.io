@@ -12,7 +12,7 @@
     body { margin: 0; }
     a-scene { width: 100vw; height: 100vh; }
     #controls { position: fixed; top: 10px; left: 10px; background: white; padding: 10px; }
-    .arjs-debug { display: none !important; }
+    .arjs-debug { display: block !important; }
     .a-enter-vr-button, .a-scene [data-a-scene] .a-canvas, .a-scene [data-a-scene] .a-scene-controls {
       display: none !important;
     }
@@ -20,17 +20,17 @@
 </head>
 <body>
   <div id="container">
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+    <a-scene embedded arjs="sourceType: webcam;" vr-mode-ui="enabled: false">
       <a-marker preset="hiro">
-        <!-- This is where the cube will be placed -->
-        <a-box position="0 0 0" rotation="0 0 0" color="#4CC3D9"></a-box>
+        <!-- Debugging Shape -->
+        <a-sphere position="0 0 0" radius="0.5" color="#EF2D5E"></a-sphere>
       </a-marker>
       <a-entity camera></a-entity>
     </a-scene>
   </div>
 
   <div id="controls">
-    <!-- No controls needed for this basic test -->
+    <!-- Controls for AR testing -->
   </div>
 
   <script>
