@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AR Money Stack</title>
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.1/aframe/build/aframe-ar.js"></script>
@@ -9,11 +10,21 @@
     body { margin: 0; }
     #container { position: absolute; width: 100%; height: 100%; }
     #controls { position: fixed; top: 10px; left: 10px; background: white; padding: 10px; }
+
+    /* Hide AR.js debug UI */
+    .arjs-debug { display: none !important; }
+
+    /* Hide A-Frame's VR mode UI */
+    .a-enter-vr-button,
+    .a-scene [data-a-scene] .a-canvas,
+    .a-scene [data-a-scene] .a-scene-controls {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
   <div id="container">
-    <a-scene embedded arjs>
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
       <a-marker preset="barcode">
         <a-entity id="bill-container" position="0 0 0"></a-entity>
       </a-marker>
@@ -40,7 +51,7 @@
       if (isNaN(amount) || amount <= 0) return; // Handle invalid input
 
       const billCount = Math.ceil(amount / 100); // Number of bills (1 bill = $100)
-      const billSize = 0.2; // Adjust based on your model's scale
+      const billSize = 0.1; // Adjust based on your model's scale
       const pileRadius = 0.5; // Radius of the pile
       const heightIncrement = 0.15; // Space between stacked bills
 
@@ -52,7 +63,7 @@
 
         // Create a new bill entity
         const bill = document.createElement('a-entity');
-        bill.setAttribute('gltf-model', 'url(dollars.glb)');
+        bill.setAttribute('gltf-model', 'url(/dollars.glb)'); // Update the path here
         bill.setAttribute('position', `${x} ${y} ${z}`);
         bill.setAttribute('scale', `${billSize} ${billSize} ${billSize}`);
         
