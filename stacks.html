@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AR Money Stack</title>
+  <title>AR Hiro Marker Test</title>
   <!-- Load A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
   <!-- Load AR.js for Marker Tracking -->
@@ -21,7 +21,8 @@
 <body>
   <div id="container">
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
-      <a-marker preset="barcode">
+      <a-marker preset="hiro">
+        <!-- This is where the cube will be placed -->
         <a-box position="0 0 0" rotation="0 0 0" color="#4CC3D9"></a-box>
       </a-marker>
       <a-entity camera></a-entity>
@@ -29,9 +30,7 @@
   </div>
 
   <div id="controls">
-    <label for="amount">Enter Amount:</label>
-    <input type="number" id="amount" placeholder="Amount in dollars" min="0">
-    <button id="update">Update</button>
+    <!-- No controls needed for this basic test -->
   </div>
 
   <script>
@@ -41,8 +40,6 @@
         console.error('AFRAME library is not loaded.');
       }
 
-      // No need to manually check ARJS variable. AR.js is integrated into A-Frame using the arjs attribute.
-      
       // Test if the marker and scene are detected
       const marker = document.querySelector('a-marker');
       if (!marker) {
@@ -53,43 +50,6 @@
       if (!scene) {
         console.error('A-Frame scene element not found.');
       }
-
-      document.getElementById('update').addEventListener('click', function() {
-        const amount = parseInt(document.getElementById('amount').value, 10);
-        const billContainer = document.getElementById('bill-container');
-
-        if (!billContainer) {
-          console.error('Bill container element not found.');
-          return;
-        }
-
-        // Remove existing bills
-        while (billContainer.firstChild) {
-          billContainer.removeChild(billContainer.firstChild);
-        }
-
-        if (isNaN(amount) || amount <= 0) return; // Handle invalid input
-
-        const billCount = Math.ceil(amount / 100); // Number of bills (1 bill = $100)
-        const billSize = 0.1; // Adjust based on your model's scale
-        const pileRadius = 0.5; // Radius of the pile
-        const heightIncrement = 0.15; // Space between stacked bills
-
-        for (let i = 0; i < billCount; i++) {
-          const angle = (i / billCount) * Math.PI * 2; // Evenly distribute around a circle
-          const x = Math.cos(angle) * pileRadius;
-          const z = Math.sin(angle) * pileRadius;
-          const y = i * heightIncrement; // Stack height
-
-          // Create a new bill entity
-          const bill = document.createElement('a-entity');
-          bill.setAttribute('gltf-model', 'url(dollars.glb)'); // Update the path here
-          bill.setAttribute('position', `${x} ${y} ${z}`);
-          bill.setAttribute('scale', `${billSize} ${billSize} ${billSize}`);
-          
-          billContainer.appendChild(bill);
-        }
-      });
     });
   </script>
 </body>
