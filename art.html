@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do it.</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1B1B1B;
+            overflow: hidden;
+        }
+        .message-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+        }
+        .message {
+            font-family: "Arial", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 600;
+            font-style: normal;
+            color: white;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            position: absolute;
+            width: 100%;
+            left: 0;
+            text-transform: uppercase;
+        }
+        .message-content {
+            position: relative;
+            display: inline-block;
+        }
+        .period {
+            position: absolute;
+            right: -0.20em;
+            bottom: 0.23em;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            width: 0.15em;
+            height: 0.15em;
+            background-color: white;
+            border-radius: 50%;
+        }
+        @media (max-width: 768px) {
+            .message {
+                font-size: 8vw;
+            }
+        }
+        @media (min-width: 769px) {
+            .message {
+                font-size: 5vw;
+            }
+            .period {
+                width: 0.12em;
+                height: 0.12em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="message-container">
+        <div class="message"><div class="message-content">YOU WANT TO BE MAKING ART</div></div>
+        <div class="message"><div class="message-content">YOU WANT TO MAKE ART</div></div>
+        <div class="message"><div class="message-content">YOU MAKE ART</div></div>
+        <div class="message"><div class="message-content">MAKE ART</div></div>
+        <div class="message">
+            <div class="message-content">
+                MAKE<span class="period"></span>
+            </div>
+        </div>
+    </div>
+    <script>
+        const messages = document.querySelectorAll('.message');
+        let currentIndex = 0;
+
+        function showMessage(index) {
+            setTimeout(() => {
+                messages[index].style.opacity = 1;
+                
+                if (index === messages.length - 1) {
+                    // For the last message, fade in the period after a delay
+                    setTimeout(() => {
+                        const period = messages[index].querySelector('.period');
+                        if (period) period.style.opacity = 1;
+                    }, 1500);  // Half of the message display time
+
+                    // Extend the display time for the last message
+                    setTimeout(() => {
+                        messages[index].style.opacity = 0;
+                        const period = messages[index].querySelector('.period');
+                        if (period) period.style.opacity = 0;
+                        currentIndex = (currentIndex + 1) % messages.length;
+                        showMessage(currentIndex);
+                    }, 4500); // Show last message for 4.5 seconds (1.5 seconds longer)
+                } else {
+                    setTimeout(() => {
+                        messages[index].style.opacity = 0;
+                        currentIndex = (currentIndex + 1) % messages.length;
+                        showMessage(currentIndex);
+                    }, 3000); // Show other messages for 3 seconds
+                }
+            }, 1000); // Wait 1 second before showing the message
+        }
+
+        // Start the animation after a short delay to ensure the page is fully loaded
+        setTimeout(() => showMessage(currentIndex), 500);
+    </script>
+</body>
+</html>
