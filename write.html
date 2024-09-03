@@ -32,8 +32,29 @@
         font-size: 15px;
         outline: none;
     }
+
+    #save-button {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(68, 68, 68, 0.1);
+      color: rgba(255, 255, 238, 0.3);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Quicksand', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    #save-button:hover {
+      background-color: rgba(68, 68, 68, 0.8);
+      color: rgba(255, 255, 238, 1);
+    }
   </style>
   <div id="editor" contenteditable="true"></div>
+  <button id="save-button">Save</button>
   <script>
     // Get the editor div element
 const editor = document.getElementById('editor');
@@ -41,6 +62,48 @@ const editor = document.getElementById('editor');
 // Focus the editor on page load
 window.addEventListener('DOMContentLoaded', () => {
     editor.focus();
+});
+
+// Add save functionality
+const saveButton = document.getElementById('save-button');
+
+function saveContent() {
+  const content = editor.innerText;
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  
+  // Generate filename with current date and time
+  const now = new Date();
+  const filename = [
+    [
+      now.getMonth() + 1,
+      now.getDate(),
+      now.getFullYear().toString().slice(-2)
+    ].join('.'),
+    [
+      now.getHours() % 12 || 12,
+      now.getMinutes().toString().padStart(2, '0'),
+      now.getHours() >= 12 ? 'PM' : 'AM'
+    ].join('.')
+  ].join(' | ') + '.txt';
+  
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+saveButton.addEventListener('click', saveContent);
+
+// Add cmd+enter functionality
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    saveContent();
+  }
 });
   </script>
 </body>
