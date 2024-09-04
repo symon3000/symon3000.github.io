@@ -107,6 +107,15 @@
             
             card.addEventListener('mousedown', startDragging);
             canvas.appendChild(card);
+
+            // Focus on the text and make it editable immediately for new cards
+            if (text === 'New Todo') {
+                isEditing = true;
+                cardText.contentEditable = true;
+                cardText.focus();
+                // Select all text
+                window.getSelection().selectAllChildren(cardText);
+            }
         }
 
         todos.forEach((todo, index) => {
