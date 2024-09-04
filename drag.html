@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable To-Do Cards</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        #canvas {
+            width: 100%;
+            height: 80vh;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            position: relative;
+            overflow: auto;
+        }
+        .card {
+            width: 200px;
+            min-height: 100px;
+            background-color: #ffeb3b;
+            border: 1px solid #fdd835;
+            border-radius: 5px;
+            padding: 10px;
+            position: absolute;
+            cursor: move;
+            user-select: none;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #ff4444;
+        }
+        #add-card {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 36px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        #add-card:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Draggable To-Do Cards</h1>
+    <div id="canvas"></div>
+    <button id="add-card">+</button>
+
+    <script>
+        const todos = [
+            "Double-click to edit."
+        ];
+
+        const canvas = document.getElementById('canvas');
+        const addCardBtn = document.getElementById('add-card');
+        let activeCard = null;
+        let initialX, initialY;
+        let isEditing = false;
+
+        function createCard(text = '', x = 0, y = 0) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <span class="delete-btn">&times;</span>
+                <p class="card-text">${text}</p>
+            `;
+            card.style.left = `${x}px`;
+            card.style.top = `${y}px`;
+            
+            const deleteBtn = card.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', () => {
+                canvas.removeChild(card);
+            });
+            
+            const cardText = card.querySelector('.card-text');
+            cardText.addEventListener('dblclick', () => {
+                isEditing = true;
+                cardText.contentEditable = true;
+                cardText.focus();
+            });
+            
+            cardText.addEventListener('blur', () => {
+                isEditing = false;
+                cardText.contentEditable = false;
+            });
+            
+            card.addEventListener('mousedown', startDragging);
+            canvas.appendChild(card);
+        }
+
+        todos.forEach((todo, index) => {
+            createCard(todo, (index % 5) * 220, Math.floor(index / 5) * 120);
+        });
+
+        addCardBtn.addEventListener('click', () => {
+            const x = Math.random() * (canvas.clientWidth - 200);
+            const y = Math.random() * (canvas.clientHeight - 100);
+            createCard('New Todo', x, y);
+        });
+
+        function startDragging(e) {
+            if (isEditing) return;
+            activeCard = e.currentTarget;
+            initialX = e.clientX - activeCard.offsetLeft;
+            initialY = e.clientY - activeCard.offsetTop;
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDragging);
+        }
+
+        function drag(e) {
+            if (activeCard) {
+                e.preventDefault();
+                let newX = e.clientX - initialX;
+                let newY = e.clientY - initialY;
+                
+                newX += canvas.scrollLeft;
+                newY += canvas.scrollTop;
+                
+                activeCard.style.left = `${newX}px`;
+                activeCard.style.top = `${newY}px`;
+            }
+        }
+
+        function stopDragging() {
+            activeCard = null;
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDragging);
+        }
+    </script>
+</body>
+</html>
