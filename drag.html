@@ -60,6 +60,15 @@
         #add-card:hover {
             background-color: #45a049;
         }
+        .card.selected {
+            box-shadow: 0 0 0 2px #4CAF50;
+        }
+        #selection-box {
+            position: absolute;
+            border: 2px dashed #4CAF50;
+            background-color: rgba(76, 175, 80, 0.1);
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -77,6 +86,10 @@
         let activeCard = null;
         let initialX, initialY;
         let isEditing = false;
+        let isSelecting = false;
+        let selectionStart = { x: 0, y: 0 };
+        let selectionBox = null;
+        let selectedCards = new Set();
 
         function createCard(text = '', x = 0, y = 0) {
             const card = document.createElement('div');
@@ -128,11 +141,72 @@
             createCard('New Todo', x, y);
         });
 
+        canvas.addEventListener('mousedown', startSelection);
+        canvas.addEventListener('mousemove', updateSelection);
+        canvas.addEventListener('mouseup', endSelection);
+
+        function startSelection(e) {
+            if (e.target === canvas) {
+                isSelecting = true;
+                selectionStart = { x: e.clientX + canvas.scrollLeft, y: e.clientY + canvas.scrollTop };
+                selectionBox = document.createElement('div');
+                selectionBox.id = 'selection-box';
+                canvas.appendChild(selectionBox);
+            }
+        }
+
+        function updateSelection(e) {
+            if (isSelecting) {
+                const currentX = e.clientX + canvas.scrollLeft;
+                const currentY = e.clientY + canvas.scrollTop;
+                const left = Math.min(selectionStart.x, currentX);
+                const top = Math.min(selectionStart.y, currentY);
+                const width = Math.abs(currentX - selectionStart.x);
+                const height = Math.abs(currentY - selectionStart.y);
+
+                selectionBox.style.left = `${left}px`;
+                selectionBox.style.top = `${top}px`;
+                selectionBox.style.width = `${width}px`;
+                selectionBox.style.height = `${height}px`;
+
+                // Check which cards are within the selection box
+                document.querySelectorAll('.card').forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const cardLeft = rect.left + canvas.scrollLeft;
+                    const cardTop = rect.top + canvas.scrollTop;
+                    if (cardLeft < left + width && cardLeft + rect.width > left &&
+                        cardTop < top + height && cardTop + rect.height > top) {
+                        card.classList.add('selected');
+                        selectedCards.add(card);
+                    } else {
+                        card.classList.remove('selected');
+                        selectedCards.delete(card);
+                    }
+                });
+            }
+        }
+
+        function endSelection() {
+            isSelecting = false;
+            if (selectionBox) {
+                canvas.removeChild(selectionBox);
+                selectionBox = null;
+            }
+        }
+
         function startDragging(e) {
             if (isEditing) return;
             activeCard = e.currentTarget;
             initialX = e.clientX - activeCard.offsetLeft;
             initialY = e.clientY - activeCard.offsetTop;
+
+            if (!activeCard.classList.contains('selected')) {
+                selectedCards.forEach(card => card.classList.remove('selected'));
+                selectedCards.clear();
+                activeCard.classList.add('selected');
+                selectedCards.add(activeCard);
+            }
+
             document.addEventListener('mousemove', drag);
             document.addEventListener('mouseup', stopDragging);
         }
@@ -146,8 +220,15 @@
                 newX += canvas.scrollLeft;
                 newY += canvas.scrollTop;
                 
-                activeCard.style.left = `${newX}px`;
-                activeCard.style.top = `${newY}px`;
+                const deltaX = newX - parseInt(activeCard.style.left);
+                const deltaY = newY - parseInt(activeCard.style.top);
+
+                selectedCards.forEach(card => {
+                    const cardX = parseInt(card.style.left) + deltaX;
+                    const cardY = parseInt(card.style.top) + deltaY;
+                    card.style.left = `${cardX}px`;
+                    card.style.top = `${cardY}px`;
+                });
             }
         }
 
