@@ -135,11 +135,20 @@
             createCard(todo, (index % 5) * 220, Math.floor(index / 5) * 120);
         });
 
-        addCardBtn.addEventListener('click', () => {
+        addCardBtn.addEventListener('click', createNewCard);
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                e.preventDefault();
+                createNewCard();
+            }
+        });
+
+        function createNewCard() {
             const x = Math.random() * (canvas.clientWidth - 200);
             const y = Math.random() * (canvas.clientHeight - 100);
             createCard('New Todo', x, y);
-        });
+        }
 
         canvas.addEventListener('mousedown', startSelection);
         canvas.addEventListener('mousemove', updateSelection);
