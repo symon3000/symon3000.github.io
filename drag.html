@@ -69,11 +69,61 @@
             background-color: rgba(76, 175, 80, 0.1);
             pointer-events: none;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 400px;
+            background-color: #f4f4f4;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .close-modal:hover {
+            color: #000;
+        }
+
+        #batchInput {
+            width: 100%;
+            height: 100%;
+            border: none;
+            resize: none;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <h1>Draggable To-Do Cards</h1>
-    <div id="canvas"></div>
+    <div id="canvas">
+        <div id="batchModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <textarea id="batchInput" placeholder="Enter tasks, one per line"></textarea>
+            </div>
+        </div>
+    </div>
     <button id="add-card">+</button>
 
     <script>
@@ -90,6 +140,32 @@
         let selectionStart = { x: 0, y: 0 };
         let selectionBox = null;
         let selectedCards = new Set();
+
+        let lastCardPosition = { col: 0, row: 0 };
+        const cardWidth = 220;  // 200px width + 20px margin
+        const cardHeight = 120; // 100px height + 20px margin
+
+        const batchModal = document.getElementById('batchModal');
+        const batchInput = document.getElementById('batchInput');
+        const closeModalBtn = document.querySelector('.close-modal');
+        let isBatchModalOpen = false;
+
+        // Initialize lastCardPosition based on existing cards
+        function initializeLastCardPosition() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const col = Math.floor(parseInt(card.style.left) / cardWidth);
+                const row = Math.floor(parseInt(card.style.top) / cardHeight);
+                lastCardPosition.col = Math.max(lastCardPosition.col, col);
+                lastCardPosition.row = Math.max(lastCardPosition.row, row);
+            });
+            // Move to the next position
+            lastCardPosition.row++;
+            if (lastCardPosition.row * cardHeight + cardHeight > canvas.clientHeight) {
+                lastCardPosition.row = 0;
+                lastCardPosition.col++;
+            }
+        }
 
         function createCard(text = '', x = 0, y = 0) {
             const card = document.createElement('div');
@@ -135,20 +211,99 @@
             createCard(todo, (index % 5) * 220, Math.floor(index / 5) * 120);
         });
 
+        // Activate the input field of the first card
+        const firstCard = document.querySelector('.card');
+        if (firstCard) {
+            const cardText = firstCard.querySelector('.card-text');
+            isEditing = true;
+            cardText.contentEditable = true;
+            cardText.focus();
+            // Select all text
+            window.getSelection().selectAllChildren(cardText);
+        }
+
         addCardBtn.addEventListener('click', createNewCard);
 
         document.addEventListener('keydown', (e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+            // Handle cmd+shift+enter first
+            if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'Enter') {
                 e.preventDefault();
-                createNewCard();
+                openBatchModal();
+                return;
+            }
+
+            // Then handle cmd+enter
+            if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 'Enter') {
+                e.preventDefault();
+                if (isBatchModalOpen) {
+                    createBatchCards();
+                } else {
+                    createNewCard();
+                }
+                return;
+            }
+
+            // Add this new block to handle cmd+a (or ctrl+a)
+            if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+                e.preventDefault();
+                selectAllCards();
+            }
+
+            // Update this block to handle Escape key and cmd+delete
+            if (e.key === 'Escape' || ((e.metaKey || e.ctrlKey) && e.key === 'Backspace')) {
+                const activeElement = document.activeElement;
+                if (activeElement.classList.contains('card-text') && activeElement.isContentEditable) {
+                    e.preventDefault();
+                    if (e.key === 'Escape') {
+                        activeElement.blur();
+                        isEditing = false;
+                        activeElement.contentEditable = false;
+                    } else {
+                        // Handle cmd+delete
+                        const card = activeElement.closest('.card');
+                        if (card) {
+                            canvas.removeChild(card);
+                            selectedCards.delete(card);
+                        }
+                    }
+                } else if ((e.metaKey || e.ctrlKey) && e.key === 'Backspace') {
+                    e.preventDefault();
+                    deleteSelectedCards();
+                }
+            }
+
+            // Add this new block to handle Escape key
+            if (e.key === 'Escape') {
+                if (isBatchModalOpen) {
+                    closeBatchModal();
+                } else {
+                    const activeElement = document.activeElement;
+                    if (activeElement.classList.contains('card-text') && activeElement.isContentEditable) {
+                        activeElement.blur();
+                        isEditing = false;
+                        activeElement.contentEditable = false;
+                    }
+                }
             }
         });
 
-        function createNewCard() {
-            const x = Math.random() * (canvas.clientWidth - 200);
-            const y = Math.random() * (canvas.clientHeight - 100);
-            createCard('New Todo', x, y);
+        closeModalBtn.addEventListener('click', closeBatchModal);
+
+        function createNewCard(text = '') {
+            const x = lastCardPosition.col * cardWidth;
+            const y = lastCardPosition.row * cardHeight;
+            createCard(text || 'New Todo', x, y);
+
+            // Update the last card position
+            lastCardPosition.row++;
+            if (lastCardPosition.row * cardHeight + cardHeight > canvas.clientHeight) {
+                lastCardPosition.row = 0;
+                lastCardPosition.col++;
+            }
         }
+
+        // Call this after creating initial cards
+        initializeLastCardPosition();
 
         canvas.addEventListener('mousedown', startSelection);
         canvas.addEventListener('mousemove', updateSelection);
@@ -157,7 +312,11 @@
         function startSelection(e) {
             if (e.target === canvas) {
                 isSelecting = true;
-                selectionStart = { x: e.clientX + canvas.scrollLeft, y: e.clientY + canvas.scrollTop };
+                const canvasRect = canvas.getBoundingClientRect();
+                selectionStart = {
+                    x: e.clientX - canvasRect.left + canvas.scrollLeft,
+                    y: e.clientY - canvasRect.top + canvas.scrollTop
+                };
                 selectionBox = document.createElement('div');
                 selectionBox.id = 'selection-box';
                 canvas.appendChild(selectionBox);
@@ -166,8 +325,9 @@
 
         function updateSelection(e) {
             if (isSelecting) {
-                const currentX = e.clientX + canvas.scrollLeft;
-                const currentY = e.clientY + canvas.scrollTop;
+                const canvasRect = canvas.getBoundingClientRect();
+                const currentX = e.clientX - canvasRect.left + canvas.scrollLeft;
+                const currentY = e.clientY - canvasRect.top + canvas.scrollTop;
                 const left = Math.min(selectionStart.x, currentX);
                 const top = Math.min(selectionStart.y, currentY);
                 const width = Math.abs(currentX - selectionStart.x);
@@ -181,8 +341,8 @@
                 // Check which cards are within the selection box
                 document.querySelectorAll('.card').forEach(card => {
                     const rect = card.getBoundingClientRect();
-                    const cardLeft = rect.left + canvas.scrollLeft;
-                    const cardTop = rect.top + canvas.scrollTop;
+                    const cardLeft = rect.left - canvasRect.left + canvas.scrollLeft;
+                    const cardTop = rect.top - canvasRect.top + canvas.scrollTop;
                     if (cardLeft < left + width && cardLeft + rect.width > left &&
                         cardTop < top + height && cardTop + rect.height > top) {
                         card.classList.add('selected');
@@ -245,6 +405,41 @@
             activeCard = null;
             document.removeEventListener('mousemove', drag);
             document.removeEventListener('mouseup', stopDragging);
+        }
+
+        function deleteSelectedCards() {
+            selectedCards.forEach(card => {
+                canvas.removeChild(card);
+            });
+            selectedCards.clear();
+        }
+
+        function openBatchModal() {
+            batchModal.style.display = 'block';
+            batchInput.focus();
+            isBatchModalOpen = true;
+        }
+
+        function closeBatchModal() {
+            batchModal.style.display = 'none';
+            batchInput.value = '';
+            isBatchModalOpen = false;
+        }
+
+        function createBatchCards() {
+            const tasks = batchInput.value.split('\n').filter(task => task.trim() !== '');
+            tasks.forEach(task => {
+                createNewCard(task.trim());
+            });
+            closeBatchModal();
+        }
+
+        function selectAllCards() {
+            const allCards = document.querySelectorAll('.card');
+            allCards.forEach(card => {
+                card.classList.add('selected');
+                selectedCards.add(card);
+            });
         }
     </script>
 </body>
