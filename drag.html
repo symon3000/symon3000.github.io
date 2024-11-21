@@ -123,6 +123,25 @@
             white-space: pre-wrap;
             max-width: 100%;
         }
+
+        .header {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            cursor: move;
+            user-select: none;
+            padding: 10px;
+        }
+
+        .header .delete-btn {
+            font-size: 16px;
+            visibility: hidden;
+        }
+
+        .header:hover .delete-btn {
+            visibility: visible;
+        }
     </style>
 </head>
 <body>
@@ -235,6 +254,16 @@
 
         addCardBtn.addEventListener('click', createNewCard);
 
+        // Add this before your other event listeners
+        window.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'h') {
+                e.preventDefault();
+                e.stopPropagation();
+                createHeader();
+                return false;
+            }
+        }, {capture: true, passive: false});  // The 'true' here makes this capture the event before other handlers
+
         document.addEventListener('keydown', (e) => {
             // Handle cmd+shift+enter first
             if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'Enter') {
@@ -296,6 +325,7 @@
                     }
                 }
             }
+
         });
 
         closeModalBtn.addEventListener('click', closeBatchModal);
@@ -451,6 +481,43 @@
                 card.classList.add('selected');
                 selectedCards.add(card);
             });
+        }
+
+        function createHeader(text = '', x = 0, y = 0) {
+            const header = document.createElement('div');
+            header.className = 'header';
+            header.innerHTML = `
+                <span class="delete-btn">&times;</span>
+                <span class="header-text" contenteditable="false">Header</span>
+            `;
+            header.style.left = `${x}px`;
+            header.style.top = `${y}px`;
+            
+            const deleteBtn = header.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', () => {
+                canvas.removeChild(header);
+            });
+            
+            const headerText = header.querySelector('.header-text');
+            headerText.addEventListener('dblclick', () => {
+                headerText.contentEditable = true;
+                headerText.focus();
+            });
+            
+            headerText.addEventListener('blur', () => {
+                headerText.contentEditable = false;
+            });
+            
+            header.addEventListener('mousedown', startDragging);
+            canvas.appendChild(header);
+
+            // Make the header text editable immediately
+            if (text === '') {
+                headerText.contentEditable = true;
+                headerText.focus();
+                // Select all text
+                window.getSelection().selectAllChildren(headerText);
+            }
         }
     </script>
 </body>
