@@ -2,7 +2,10 @@
 <html>
 <head>
     <style>
-        body { margin: 0; }
+        body { 
+            margin: 0; 
+            background-color: #000000;
+        }
         canvas { display: block; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -151,6 +154,56 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
+
+        // Touch event handlers for mobile
+        document.addEventListener('touchstart', function(event) {
+            event.preventDefault();
+            isMouseDown = true;
+            autoRotate = false;
+            const touch = event.touches[0];
+            previousMousePosition = {
+                x: touch.clientX,
+                y: touch.clientY
+            };
+            currentMousePosition = {
+                x: touch.clientX,
+                y: touch.clientY
+            };
+        });
+
+        document.addEventListener('touchend', function(event) {
+            event.preventDefault();
+            isMouseDown = false;
+            autoRotate = true;
+            lastAutoRotationX = cube.rotation.x;
+            lastAutoRotationY = cube.rotation.y;
+        });
+
+        document.addEventListener('touchmove', function(event) {
+            event.preventDefault();
+            const touch = event.touches[0];
+            currentMousePosition = {
+                x: touch.clientX,
+                y: touch.clientY
+            };
+            
+            if (!isMouseDown) return;
+
+            const deltaMove = {
+                x: touch.clientX - previousMousePosition.x,
+                y: touch.clientY - previousMousePosition.y
+            };
+
+            cube.rotation.y += deltaMove.x * 0.005;
+            cube.rotation.x += deltaMove.y * 0.005;
+            sphere.rotation.y += deltaMove.x * 0.005;
+            sphere.rotation.x += deltaMove.y * 0.005;
+
+            previousMousePosition = {
+                x: touch.clientX,
+                y: touch.clientY
+            };
+        });
 
         // Start animation
         animate();
