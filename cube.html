@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Set background to black
+        scene.background = new THREE.Color(0x000000);
+
+        // Create cube with reflective blue material
+        const cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
+        const cubeMaterial = new THREE.MeshPhongMaterial({
+            color: 0x0044aa,
+            specular: 0x555555,
+            shininess: 30,
+            transparent: true,
+            opacity: 0.8
+        });
+        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+        // Create darker sphere inside
+        const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+        const sphereMaterial = new THREE.MeshPhongMaterial({
+            color: 0x001133,
+            specular: 0x222222,
+            shininess: 20
+        });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        
+        // Add meshes to scene
+        scene.add(cube);
+        scene.add(sphere);
+
+        // Add lights
+        const light1 = new THREE.PointLight(0xffffff, 1, 100);
+        light1.position.set(5, 5, 5);
+        scene.add(light1);
+
+        const light2 = new THREE.PointLight(0xffffff, 0.6, 100);
+        light2.position.set(-5, -5, -5);
+        scene.add(light2);
+
+        // Position camera
+        camera.position.z = 5;
+
+        // Mouse interaction variables
+        let isMouseDown = false;
+        let previousMousePosition = {
+            x: 0,
+            y: 0
+        };
+        let currentMousePosition = {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2
+        };
+
+        // Animation state
+        let autoRotate = true;
+        let lastAutoRotationX = cube.rotation.x;
+        let lastAutoRotationY = cube.rotation.y;
+
+        // Mouse event handlers
+        document.addEventListener('mousedown', function(event) {
+            isMouseDown = true;
+            autoRotate = false;
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        });
+
+        document.addEventListener('mouseup', function() {
+            isMouseDown = false;
+            autoRotate = true;
+            // Store the current rotation to continue from here
+            lastAutoRotationX = cube.rotation.x;
+            lastAutoRotationY = cube.rotation.y;
+        });
+
+        document.addEventListener('mousemove', function(event) {
+            currentMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+            
+            if (!isMouseDown) return;
+
+            const deltaMove = {
+                x: event.clientX - previousMousePosition.x,
+                y: event.clientY - previousMousePosition.y
+            };
+
+            // Rotate cube based on mouse movement
+            cube.rotation.y += deltaMove.x * 0.005;
+            cube.rotation.x += deltaMove.y * 0.005;
+
+            // Rotate sphere with cube
+            sphere.rotation.y += deltaMove.x * 0.005;
+            sphere.rotation.x += deltaMove.y * 0.005;
+
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        });
+
+        // Animation function
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (autoRotate) {
+                // Calculate direction vector from cube center to mouse
+                const screenCenter = {
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2
+                };
+                
+                // Get vector from center to mouse
+                const mouseVector = {
+                    x: -(currentMousePosition.x - screenCenter.x) / screenCenter.x,
+                    y: (currentMousePosition.y - screenCenter.y) / screenCenter.y
+                };
+                
+                // Apply rotation in opposite direction of mouse
+                cube.rotation.x += mouseVector.y * 0.03;
+                cube.rotation.y += mouseVector.x * 0.03;
+                sphere.rotation.x += mouseVector.y * 0.02;
+                sphere.rotation.y += mouseVector.x * 0.02;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', onWindowResize, false);
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
