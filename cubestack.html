@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Composite Cube</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000000;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Camera position
+        camera.position.z = 5;
+
+        // Create group for composite cube
+        const cubeGroup = new THREE.Group();
+
+        // Create different materials
+        const materials = {
+            translucent: new THREE.MeshPhongMaterial({
+                color: 0x1a237e,
+                transparent: true,
+                opacity: 0.6,
+                shininess: 100
+            }),
+            smokedGlass: new THREE.MeshPhongMaterial({
+                color: 0x283593,
+                transparent: true,
+                opacity: 0.9,
+                shininess: 50
+            }),
+            opaque: new THREE.MeshPhongMaterial({
+                color: 0x3949ab,
+                shininess: 30
+            }),
+            metallic: new THREE.MeshPhongMaterial({
+                color: 0x5c6bc0,
+                metalness: 0.8,
+                roughness: 0.2,
+                shininess: 80
+            })
+        };
+
+        // Define cube sections (8 equal parts)
+        const cubeSize = 2;
+        const halfSize = cubeSize / 2;
+        const sections = [
+            // Bottom layer (4 cubes)
+            {
+                position: [-halfSize/2, -halfSize/2, -halfSize/2],
+                material: materials.translucent
+            },
+            {
+                position: [halfSize/2, -halfSize/2, -halfSize/2],
+                material: materials.smokedGlass
+            },
+            {
+                position: [-halfSize/2, -halfSize/2, halfSize/2],
+                material: materials.opaque
+            },
+            {
+                position: [halfSize/2, -halfSize/2, halfSize/2],
+                material: materials.metallic
+            },
+            // Top layer (4 cubes)
+            {
+                position: [-halfSize/2, halfSize/2, -halfSize/2],
+                material: materials.metallic
+            },
+            {
+                position: [halfSize/2, halfSize/2, -halfSize/2],
+                material: materials.opaque
+            },
+            {
+                position: [-halfSize/2, halfSize/2, halfSize/2],
+                material: materials.smokedGlass
+            },
+            {
+                position: [halfSize/2, halfSize/2, halfSize/2],
+                material: materials.translucent
+            }
+        ];
+
+        // Create subcubes
+        sections.forEach(({ position, material }) => {
+            const geometry = new THREE.BoxGeometry(halfSize, halfSize, halfSize);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(...position);
+            cubeGroup.add(mesh);
+        });
+
+        scene.add(cubeGroup);
+
+        // Add lights
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0x4a5cff, 1, 100);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        const pointLight2 = new THREE.PointLight(0x4a5cff, 0.8, 100);
+        pointLight2.position.set(-5, -5, -5);
+        scene.add(pointLight2);
+
+        // Mouse movement tracking
+        let mouseX = 0;
+        let mouseY = 0;
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX) / 100;
+            mouseY = (event.clientY - windowHalfY) / 100;
+        });
+
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Smooth rotation based on mouse position
+            cubeGroup.rotation.y += (mouseX - cubeGroup.rotation.y) * 0.05;
+            cubeGroup.rotation.x += (mouseY - cubeGroup.rotation.x) * 0.05;
+
+            // Add slight constant rotation
+            cubeGroup.rotation.z += 0.005;
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
