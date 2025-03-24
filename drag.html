@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Draggable To-Do Cards</title>
     <style>
-            body {
+        body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #121212;
             color: #e0e0e0;
         }
+
         #canvas {
             width: 100%;
             height: 80vh;
@@ -20,6 +22,7 @@
             position: relative;
             overflow: auto;
         }
+
         .card {
             width: 200px;
             min-height: 100px;
@@ -30,9 +33,11 @@
             position: absolute;
             cursor: move;
             user-select: none;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
             color: #e0e0e0;
+            z-index: 10;
         }
+
         .delete-btn {
             position: absolute;
             top: 5px;
@@ -41,6 +46,7 @@
             font-weight: bold;
             color: #ff6b6b;
         }
+
         #add-card {
             position: fixed;
             top: 20px;
@@ -56,21 +62,25 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             z-index: 1000;
         }
+
         #add-card:hover {
             background-color: #45a049;
         }
+
         .card.selected {
             box-shadow: 0 0 0 2px #4CAF50;
         }
+
         #selection-box {
             position: absolute;
             border: 2px dashed #4CAF50;
             background-color: rgba(76, 175, 80, 0.1);
             pointer-events: none;
         }
+
         .modal {
             display: none;
             position: fixed;
@@ -142,8 +152,73 @@
         .header:hover .delete-btn {
             visibility: visible;
         }
+
+        .minimize-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            color: #e0e0e0;
+        }
+
+        .agenda.minimized .time-slot {
+            display: none;
+        }
+
+        /* Agenda Styles */
+        .agenda {
+            position: absolute;
+            width: 300px;
+            background-color: #2c2c2c;
+            border: 1px solid #444;
+            border-radius: 5px;
+            cursor: move;
+            user-select: none;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            color: #e0e0e0;
+            z-index: 5;
+        }
+
+        .agenda-header {
+            background-color: #3c3c3c;
+            padding: 10px;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #444;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+
+        .time-slot {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+            min-height: 30px;
+            display: flex;
+        }
+
+        .time-label {
+            width: 60px;
+        }
+
+        .slot-content {
+            flex-grow: 1;
+            min-height: 20px;
+        }
+
+        .card-in-slot {
+            width: auto;
+            min-height: auto;
+            position: relative;
+            margin-bottom: 5px;
+            padding: 5px;
+            background-color: #3e3e3e;
+            border-radius: 3px;
+        }
     </style>
 </head>
+
 <body>
     <h1>Draggable To-Do Cards</h1>
     <div id="canvas">
@@ -167,11 +242,17 @@
         let initialX, initialY;
         let isEditing = false;
         let isSelecting = false;
-        let selectionStart = { x: 0, y: 0 };
+        let selectionStart = {x: 0, y: 0};
         let selectionBox = null;
         let selectedCards = new Set();
+        let activeAgenda = null;
+        let draggedItem = null;
+        let overSlot = null;
+        let draggedFromAgenda = false;
+        let originalParent = null;
+        let originalPosition = { left: 0, top: 0 };
 
-        let lastCardPosition = { col: 0, row: 0 };
+        let lastCardPosition = {col: 0, row: 0};
         const cardWidth = 220;  // 200px width + 20px margin
         const cardHeight = 120; // 100px height + 20px margin
 
@@ -206,24 +287,26 @@
             `;
             card.style.left = `${x}px`;
             card.style.top = `${y}px`;
-            
+            // Start with draggable=false to avoid conflicts
+            card.draggable = false;
+
             const deleteBtn = card.querySelector('.delete-btn');
             deleteBtn.addEventListener('click', () => {
                 canvas.removeChild(card);
             });
-            
+
             const cardText = card.querySelector('.card-text');
             cardText.addEventListener('dblclick', () => {
                 isEditing = true;
                 cardText.contentEditable = true;
                 cardText.focus();
             });
-            
+
             cardText.addEventListener('blur', () => {
                 isEditing = false;
                 cardText.contentEditable = false;
             });
-            
+
             card.addEventListener('mousedown', startDragging);
             canvas.appendChild(card);
 
@@ -235,11 +318,412 @@
                 // Select all text
                 window.getSelection().selectAllChildren(cardText);
             }
+
+            return card;
+        }
+
+        function createAgenda() {
+            const agenda = document.createElement('div');
+            agenda.className = 'agenda';
+            agenda.innerHTML = `
+                <div class="agenda-header">
+                    <span>Daily Agenda</span>
+                    <span class="minimize-btn">−</span>
+                </div>
+            `;
+            // Position the agenda on the right side of the canvas
+            agenda.style.left = `${canvas.clientWidth - 330}px`;
+            agenda.style.top = '30px';
+
+            // Add time slots from 7AM to 9PM
+            for (let hour = 7; hour <= 21; hour++) {
+                const formattedHour = hour > 12 ? (hour - 12) + ' PM' : hour + ' AM';
+                const timeSlot = document.createElement('div');
+                timeSlot.className = 'time-slot';
+                timeSlot.dataset.hour = hour;
+                timeSlot.innerHTML = `
+                    <div class="time-label">${formattedHour}</div>
+                    <div class="slot-content" data-hour="${hour}"></div>
+                `;
+                agenda.appendChild(timeSlot);
+
+                // Make the slot-content a drop target
+                const slotContent = timeSlot.querySelector('.slot-content');
+                slotContent.addEventListener('dragover', handleSlotDragOver);
+                slotContent.addEventListener('dragleave', handleSlotDragLeave);
+                slotContent.addEventListener('drop', handleSlotDrop);
+
+                // Enable dragging into and out of slots
+                slotContent.addEventListener('dragstart', function(e) {
+                    if (e.target.classList.contains('card-in-slot')) {
+                        draggedItem = e.target;
+                        draggedFromAgenda = true;
+                        originalParent = slotContent;
+                        // Store original position for returning to canvas if needed
+                        const agendaRect = slotContent.closest('.agenda').getBoundingClientRect();
+                        originalPosition = {
+                            left: agendaRect.left + 50,
+                            top: slotContent.getBoundingClientRect().top
+                        };
+                        setTimeout(() => {
+                            draggedItem.style.opacity = '0.5';
+                        }, 0);
+                    }
+                });
+            }
+
+            // Add minimize button functionality
+            const minimizeBtn = agenda.querySelector('.minimize-btn');
+            minimizeBtn.addEventListener('click', () => {
+                agenda.classList.toggle('minimized');
+                minimizeBtn.textContent = agenda.classList.contains('minimized') ? '+' : '−';
+            });
+
+            // Make agenda draggable
+            agenda.addEventListener('mousedown', (e) => {
+                // Only handle drag if it's on the header or the time labels
+                if (e.target.closest('.agenda-header') || e.target.classList.contains('time-label')) {
+                    activeAgenda = agenda;
+                    initialX = e.clientX - agenda.offsetLeft;
+                    initialY = e.clientY - agenda.offsetTop;
+
+                    document.addEventListener('mousemove', dragAgenda);
+                    document.addEventListener('mouseup', stopDraggingAgenda);
+                }
+
+                // Prevent propagation to canvas to avoid selection box
+                e.stopPropagation();
+            });
+
+            canvas.appendChild(agenda);
+            return agenda;
+        }
+
+        function dragAgenda(e) {
+            if (activeAgenda) {
+                e.preventDefault();
+                let newX = e.clientX - initialX;
+                let newY = e.clientY - initialY;
+
+                newX += canvas.scrollLeft;
+                newY += canvas.scrollTop;
+
+                // Boundary check
+                newX = Math.max(0, newX);
+                newY = Math.max(0, newY);
+
+                activeAgenda.style.left = `${newX}px`;
+                activeAgenda.style.top = `${newY}px`;
+            }
+        }
+
+        function stopDraggingAgenda() {
+            activeAgenda = null;
+            document.removeEventListener('mousemove', dragAgenda);
+            document.removeEventListener('mouseup', stopDraggingAgenda);
+        }
+
+        function handleCardInAgendaDrag(e) {
+            draggedItem = e.currentTarget;
+            draggedFromAgenda = true;
+            originalParent = draggedItem.parentNode;
+
+            // Store original position for returning to canvas
+            if (originalParent.classList.contains('slot-content')) {
+                const agendaRect = originalParent.closest('.agenda').getBoundingClientRect();
+                originalPosition = {
+                    left: agendaRect.left + 50,
+                    top: originalParent.getBoundingClientRect().top
+                };
+            }
+
+            // Add a placeholder
+            const placeholder = document.createElement('div');
+            placeholder.className = 'card-placeholder';
+            placeholder.style.height = `${draggedItem.offsetHeight}px`;
+            originalParent.appendChild(placeholder);
+
+            // Set drag effect
+            draggedItem.style.opacity = '0.5';
+            setTimeout(() => {
+                if (draggedFromAgenda) {
+                    draggedItem.style.pointerEvents = 'none';
+                }
+            }, 0);
+        }
+
+        function handleCardInAgendaDragEnd() {
+            if (draggedItem) {
+                draggedItem.style.opacity = '1';
+                draggedItem.style.pointerEvents = 'auto';
+
+                // Remove any placeholders
+                document.querySelectorAll('.card-placeholder').forEach(el => el.remove());
+
+                draggedItem = null;
+                draggedFromAgenda = false;
+                overSlot = null;
+            }
+        }
+
+        function handleSlotDragOver(e) {
+            e.preventDefault();
+            overSlot = e.currentTarget;
+            overSlot.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+        }
+
+        function handleSlotDragLeave(e) {
+            if (overSlot === e.currentTarget) {
+                overSlot.style.backgroundColor = '';
+                overSlot = null;
+            }
+        }
+
+        function handleSlotDrop(e) {
+            e.preventDefault();
+            if (overSlot) {
+                overSlot.style.backgroundColor = '';
+
+                if (draggedItem) {
+                    // Convert regular card to in-slot card
+                    const cardText = draggedItem.querySelector('.card-text').textContent;
+                    const cardInSlot = document.createElement('div');
+                    cardInSlot.className = 'card-in-slot';
+                    cardInSlot.draggable = true;
+                    cardInSlot.innerHTML = `
+                        <span class="delete-btn">&times;</span>
+                        <div class="card-text">${cardText}</div>
+                    `;
+
+                    // Add delete functionality
+                    const deleteBtn = cardInSlot.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        cardInSlot.remove();
+                    });
+
+                    // Make card draggable from slot
+                    cardInSlot.addEventListener('dragstart', handleCardInAgendaDrag);
+                    cardInSlot.addEventListener('dragend', handleCardInAgendaDragEnd);
+
+                    overSlot.appendChild(cardInSlot);
+
+                    // If we dragged from canvas, remove the original card
+                    if (!draggedFromAgenda && draggedItem.parentNode === canvas) {
+                        canvas.removeChild(draggedItem);
+                    }
+
+                    // Remove original card regardless of whether it's from the same slot or another slot
+                    if (draggedFromAgenda) {
+                        originalParent.querySelectorAll('.card-placeholder').forEach(el => el.remove());
+                        if (draggedItem.parentNode) {
+                            draggedItem.parentNode.removeChild(draggedItem);
+                        }
+                    }
+                }
+
+                draggedItem = null;
+                overSlot = null;
+                draggedFromAgenda = false;
+            }
+        }
+
+        // Function to handle dragging a card-in-slot out of the agenda
+        function handleCardDragOut(e) {
+            if (draggedFromAgenda && !overSlot) {
+                // Create a new regular card based on the agenda card
+                const cardText = draggedItem.querySelector('.card-text').textContent;
+
+                // Calculate position based on where it was dropped
+                const canvasRect = canvas.getBoundingClientRect();
+                const dropX = e.clientX - canvasRect.left + canvas.scrollLeft;
+                const dropY = e.clientY - canvasRect.top + canvas.scrollTop;
+
+                const newCard = createCard(cardText, dropX - 100, dropY - 50);
+
+                // Make it draggable
+                newCard.draggable = true;
+                newCard.addEventListener('dragstart', (e) => {
+                    draggedItem = newCard;
+                    e.dataTransfer.effectAllowed = 'move';
+                    setTimeout(() => {
+                        newCard.style.opacity = '0.5';
+                    }, 0);
+                });
+
+                newCard.addEventListener('dragend', (e) => {
+                    newCard.style.opacity = '1';
+                    handleCardDragOut(e);
+                    draggedItem = null;
+                });
+
+                // Remove the original card from the agenda
+                if (originalParent && draggedItem.parentNode) {
+                    draggedItem.parentNode.removeChild(draggedItem);
+                }
+
+                draggedFromAgenda = false;
+            }
+        }
+
+        function makeDraggable() {
+            // Get all cards that don't already have drag event listeners
+            const cards = document.querySelectorAll('.card:not([data-draggable="true"])');
+            cards.forEach(card => {
+                card.setAttribute('data-draggable', 'true');
+
+                // We'll use a single mousedown/mousemove approach instead of 
+                // switching between draggable modes
+                card.draggable = false;
+
+                card.addEventListener('mousedown', (e) => {
+                    if (isEditing) return;
+
+                    // Store reference to the card for both canvas and agenda operations
+                    draggedItem = card;
+                    activeCard = card;
+                    draggedFromAgenda = false;
+
+                    initialX = e.clientX - card.offsetLeft;
+                    initialY = e.clientY - card.offsetTop;
+
+                    // For selection handling
+                    if (!card.classList.contains('selected')) {
+                        selectedCards.forEach(c => c.classList.remove('selected'));
+                        selectedCards.clear();
+                        card.classList.add('selected');
+                        selectedCards.add(card);
+                    }
+
+                    // We don't need a clone anymore, just use the actual card
+
+                    // Custom drag handling
+                    const dragMove = (moveEvent) => {
+                        // Update standard canvas dragging
+                        let newX = moveEvent.clientX - initialX;
+                        let newY = moveEvent.clientY - initialY;
+
+                        newX += canvas.scrollLeft;
+                        newY += canvas.scrollTop;
+
+                        const deltaX = newX - parseInt(activeCard.style.left);
+                        const deltaY = newY - parseInt(activeCard.style.top);
+
+                        selectedCards.forEach(card => {
+                            const cardX = parseInt(card.style.left) + deltaX;
+                            const cardY = parseInt(card.style.top) + deltaY;
+                            card.style.left = `${cardX}px`;
+                            card.style.top = `${cardY}px`;
+                        });
+
+                        // No clone to position anymore
+
+                        // Check if we're over an agenda slot
+                        const slots = document.querySelectorAll('.slot-content');
+                        let isOverSlot = false;
+
+                        slots.forEach(slot => {
+                            const slotRect = slot.getBoundingClientRect();
+                            if (moveEvent.clientX >= slotRect.left && moveEvent.clientX <= slotRect.right &&
+                                moveEvent.clientY >= slotRect.top && moveEvent.clientY <= slotRect.bottom) {
+
+                                // Highlight the slot
+                                if (overSlot && overSlot !== slot) {
+                                    overSlot.style.backgroundColor = '';
+                                }
+                                overSlot = slot;
+                                overSlot.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                                isOverSlot = true;
+                            }
+                        });
+
+                        // Clear highlight if not over any slot
+                        if (!isOverSlot && overSlot) {
+                            overSlot.style.backgroundColor = '';
+                            overSlot = null;
+                        }
+                    };
+
+                    const dragEnd = () => {
+                        // No clone to clean up
+
+                        // Handle drop into agenda slot
+                        if (overSlot) {
+                            // Create in-slot card
+                            const cardText = draggedItem.querySelector('.card-text').textContent;
+                            const cardInSlot = document.createElement('div');
+                            cardInSlot.className = 'card-in-slot';
+                            cardInSlot.draggable = true;
+                            cardInSlot.innerHTML = `
+                                <span class="delete-btn">&times;</span>
+                                <div class="card-text">${cardText}</div>
+                            `;
+
+                            // Add delete functionality
+                            const deleteBtn = cardInSlot.querySelector('.delete-btn');
+                            deleteBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                cardInSlot.remove();
+                            });
+
+                            // Add drag from slot functionality
+                            cardInSlot.addEventListener('dragstart', handleCardInAgendaDrag);
+                            cardInSlot.addEventListener('dragend', handleCardInAgendaDragEnd);
+
+                            overSlot.appendChild(cardInSlot);
+
+                            // Remove original card from canvas if it's not part of a multi-selection
+                            if (selectedCards.size <= 1) {
+                                canvas.removeChild(draggedItem);
+                            } else {
+                                // Just remove the active card from selection
+                                selectedCards.delete(draggedItem);
+                                canvas.removeChild(draggedItem);
+                            }
+
+                            overSlot.style.backgroundColor = '';
+                            overSlot = null;
+                        }
+
+                        document.removeEventListener('mousemove', dragMove);
+                        document.removeEventListener('mouseup', dragEnd);
+                        activeCard = null;
+                        draggedItem = null;
+                    };
+
+                    document.addEventListener('mousemove', dragMove);
+                    document.addEventListener('mouseup', dragEnd);
+
+                    // Prevent default dragging behavior
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+
+                // Keep these for dragging from agenda back to canvas
+                card.addEventListener('dragend', (e) => {
+                    card.style.opacity = '1';
+                    handleCardDragOut(e);
+                    draggedItem = null;
+                });
+            });
+
+            // Make agenda slots droppable
+            document.querySelectorAll('.slot-content').forEach(slot => {
+                slot.addEventListener('dragover', handleSlotDragOver);
+                slot.addEventListener('dragleave', handleSlotDragLeave);
+                slot.addEventListener('drop', handleSlotDrop);
+            });
         }
 
         todos.forEach((todo, index) => {
             createCard(todo, (index % 5) * 220, Math.floor(index / 5) * 120);
         });
+
+        // Create an agenda
+        createAgenda();
+
+        // Make cards draggable
+        makeDraggable();
 
         // Activate the input field of the first card
         const firstCard = document.querySelector('.card');
@@ -333,7 +817,10 @@
         function createNewCard(text = '') {
             const x = lastCardPosition.col * cardWidth;
             const y = lastCardPosition.row * cardHeight;
-            createCard(text || 'New Todo', x, y);
+            const card = createCard(text || 'New Todo', x, y);
+
+            // Delegate draggable behavior to makeDraggable
+            // Don't set draggable=true here
 
             // Update the last card position
             lastCardPosition.row++;
@@ -341,6 +828,9 @@
                 lastCardPosition.row = 0;
                 lastCardPosition.col++;
             }
+
+            // Call makeDraggable to set up the conditional drag behavior
+            makeDraggable();
         }
 
         // Call this after creating initial cards
@@ -426,10 +916,10 @@
                 e.preventDefault();
                 let newX = e.clientX - initialX;
                 let newY = e.clientY - initialY;
-                
+
                 newX += canvas.scrollLeft;
                 newY += canvas.scrollTop;
-                
+
                 const deltaX = newX - parseInt(activeCard.style.left);
                 const deltaY = newY - parseInt(activeCard.style.top);
 
@@ -492,22 +982,22 @@
             `;
             header.style.left = `${x}px`;
             header.style.top = `${y}px`;
-            
+
             const deleteBtn = header.querySelector('.delete-btn');
             deleteBtn.addEventListener('click', () => {
                 canvas.removeChild(header);
             });
-            
+
             const headerText = header.querySelector('.header-text');
             headerText.addEventListener('dblclick', () => {
                 headerText.contentEditable = true;
                 headerText.focus();
             });
-            
+
             headerText.addEventListener('blur', () => {
                 headerText.contentEditable = false;
             });
-            
+
             header.addEventListener('mousedown', startDragging);
             canvas.appendChild(header);
 
@@ -519,6 +1009,34 @@
                 window.getSelection().selectAllChildren(headerText);
             }
         }
+
+        // Make canvas droppable for items from agenda
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (draggedFromAgenda) {
+                e.dataTransfer.dropEffect = 'move';
+            }
+        });
+
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (draggedFromAgenda) {
+                const canvasRect = canvas.getBoundingClientRect();
+                const dropX = e.clientX - canvasRect.left + canvas.scrollLeft;
+                const dropY = e.clientY - canvasRect.top + canvas.scrollTop;
+                const cardText = draggedItem.querySelector('.card-text').textContent;
+                const newCard = createCard(cardText, dropX - 100, dropY - 50);
+
+                // Make sure the card is fully draggable, including to agenda slots
+                makeDraggable();
+
+                if (originalParent && draggedItem.parentNode) {
+                    draggedItem.parentNode.removeChild(draggedItem);
+                }
+                draggedFromAgenda = false;
+            }
+        });
     </script>
 </body>
+
 </html>
