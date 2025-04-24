@@ -9,16 +9,16 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             background-color: #121212;
             color: #e0e0e0;
         }
 
         #canvas {
             width: 100%;
-            height: 80vh;
+            height: 100vh;
             background-color: #1e1e1e;
-            border: 1px solid #333;
+            border: none;
             position: relative;
             overflow: auto;
         }
@@ -45,29 +45,6 @@
             cursor: pointer;
             font-weight: bold;
             color: #ff6b6b;
-        }
-
-        #add-card {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            font-size: 36px;
-            background-color: #131413;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-
-        #add-card:hover {
-            background-color: #45a049;
         }
 
         .card.selected {
@@ -142,6 +119,7 @@
             cursor: move;
             user-select: none;
             padding: 10px;
+            z-index: 20;
         }
 
         .header .delete-btn {
@@ -220,24 +198,21 @@
 </head>
 
 <body>
-    <h1>Draggable To-Do Cards</h1>
     <div id="canvas">
         <div id="batchModal" class="modal">
             <div class="modal-content">
                 <span class="close-modal">&times;</span>
-                <textarea id="batchInput" placeholder="Enter tasks, one per line"></textarea>
+                <textarea id="batchInput" placeholder="One task per line, cmd+enter when done"></textarea>
             </div>
         </div>
     </div>
-    <button id="add-card">+</button>
 
     <script>
         const todos = [
-            "Double-click to edit."
+            "double-click to edit\n\ncmd+enter to add\n\ncmd+shift+enter to batch\n\ncmd+A to select all\n\ncmd+delete to remove\n\ncmd+shift+H for header"
         ];
 
         const canvas = document.getElementById('canvas');
-        const addCardBtn = document.getElementById('add-card');
         let activeCard = null;
         let initialX, initialY;
         let isEditing = false;
@@ -264,17 +239,12 @@
         // Initialize lastCardPosition based on existing cards
         function initializeLastCardPosition() {
             const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                const col = Math.floor(parseInt(card.style.left) / cardWidth);
-                const row = Math.floor(parseInt(card.style.top) / cardHeight);
-                lastCardPosition.col = Math.max(lastCardPosition.col, col);
-                lastCardPosition.row = Math.max(lastCardPosition.row, row);
-            });
-            // Move to the next position
-            lastCardPosition.row++;
-            if (lastCardPosition.row * cardHeight + cardHeight > canvas.clientHeight) {
-                lastCardPosition.row = 0;
-                lastCardPosition.col++;
+            if (cards.length > 0) {
+                const firstCard = cards[0];
+                const col = Math.floor((parseInt(firstCard.style.left) - initialXOffset) / cardWidth);
+                const row = Math.floor((parseInt(firstCard.style.top) - initialYOffset) / cardHeight);
+                lastCardPosition.col = col;
+                lastCardPosition.row = row + 1;
             }
         }
 
@@ -327,12 +297,12 @@
             agenda.className = 'agenda';
             agenda.innerHTML = `
                 <div class="agenda-header">
-                    <span>Daily Agenda</span>
+                    <span>drag cards here</span>
                     <span class="minimize-btn">−</span>
                 </div>
             `;
-            // Position the agenda on the right side of the canvas
-            agenda.style.left = `${canvas.clientWidth - 330}px`;
+            // Position the agenda on the left side of the canvas
+            agenda.style.left = '30px';
             agenda.style.top = '30px';
 
             // Add time slots from 7AM to 9PM
@@ -352,6 +322,44 @@
                 slotContent.addEventListener('dragover', handleSlotDragOver);
                 slotContent.addEventListener('dragleave', handleSlotDragLeave);
                 slotContent.addEventListener('drop', handleSlotDrop);
+                slotContent.addEventListener('dblclick', (e) => {
+                    if (e.target === slotContent) {
+                        const cardInSlot = document.createElement('div');
+                        cardInSlot.className = 'card-in-slot';
+                        cardInSlot.draggable = true;
+                        cardInSlot.innerHTML = `
+                            <span class="delete-btn">&times;</span>
+                            <div class="card-text">New Task</div>
+                        `;
+
+                        const deleteBtn = cardInSlot.querySelector('.delete-btn');
+                        deleteBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            cardInSlot.remove();
+                        });
+
+                        const cardTextElement = cardInSlot.querySelector('.card-text');
+                        cardTextElement.addEventListener('dblclick', (e) => {
+                            e.stopPropagation();
+                            cardTextElement.contentEditable = true;
+                            cardTextElement.focus();
+                        });
+
+                        cardTextElement.addEventListener('blur', () => {
+                            cardTextElement.contentEditable = false;
+                        });
+
+                        cardInSlot.addEventListener('dragstart', handleCardInAgendaDrag);
+                        cardInSlot.addEventListener('dragend', handleCardInAgendaDragEnd);
+
+                        slotContent.appendChild(cardInSlot);
+                        
+                        // Make the text editable immediately
+                        cardTextElement.contentEditable = true;
+                        cardTextElement.focus();
+                        window.getSelection().selectAllChildren(cardTextElement);
+                    }
+                });
 
                 // Enable dragging into and out of slots
                 slotContent.addEventListener('dragstart', function(e) {
@@ -503,6 +511,17 @@
                     });
 
                     // Make card draggable from slot
+                    // Add double-click editing
+                    const cardTextElement = cardInSlot.querySelector('.card-text');
+                    cardTextElement.addEventListener('dblclick', () => {
+                        cardTextElement.contentEditable = true;
+                        cardTextElement.focus();
+                    });
+
+                    cardTextElement.addEventListener('blur', () => {
+                        cardTextElement.contentEditable = false;
+                    });
+
                     cardInSlot.addEventListener('dragstart', handleCardInAgendaDrag);
                     cardInSlot.addEventListener('dragend', handleCardInAgendaDragEnd);
 
@@ -666,6 +685,17 @@
                                 cardInSlot.remove();
                             });
 
+                            // Add double-click editing
+                            const cardTextElement = cardInSlot.querySelector('.card-text');
+                            cardTextElement.addEventListener('dblclick', () => {
+                                cardTextElement.contentEditable = true;
+                                cardTextElement.focus();
+                            });
+
+                            cardTextElement.addEventListener('blur', () => {
+                                cardTextElement.contentEditable = false;
+                            });
+
                             // Add drag from slot functionality
                             cardInSlot.addEventListener('dragstart', handleCardInAgendaDrag);
                             cardInSlot.addEventListener('dragend', handleCardInAgendaDragEnd);
@@ -715,8 +745,11 @@
             });
         }
 
+        // Position first card next to agenda (agenda is 300px wide + 30px margin) and align with agenda's top
+        const initialXOffset = 360;
+        const initialYOffset = 30; // Match agenda's top position
         todos.forEach((todo, index) => {
-            createCard(todo, (index % 5) * 220, Math.floor(index / 5) * 120);
+            createCard(todo, initialXOffset + (index % 4) * 220, initialYOffset + Math.floor(index / 4) * 120);
         });
 
         // Create an agenda
@@ -736,7 +769,6 @@
             window.getSelection().selectAllChildren(cardText);
         }
 
-        addCardBtn.addEventListener('click', createNewCard);
 
         // Add this before your other event listeners
         window.addEventListener('keydown', (e) => {
@@ -769,8 +801,15 @@
 
             // Add this new block to handle cmd+a (or ctrl+a)
             if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
-                e.preventDefault();
-                selectAllCards();
+                const activeElement = document.activeElement;
+                const isEditing = activeElement.isContentEditable || 
+                                activeElement.tagName === 'TEXTAREA' || 
+                                activeElement.tagName === 'INPUT';
+                
+                if (!isEditing) {
+                    e.preventDefault();
+                    selectAllCards();
+                }
             }
 
             // Update this block to handle Escape key and cmd+delete
@@ -815,7 +854,8 @@
         closeModalBtn.addEventListener('click', closeBatchModal);
 
         function createNewCard(text = '') {
-            const x = lastCardPosition.col * cardWidth;
+            const initialXOffset = 360; // Same offset as initial cards
+            const x = initialXOffset + lastCardPosition.col * cardWidth;
             const y = lastCardPosition.row * cardHeight;
             const card = createCard(text || 'New Todo', x, y);
 
@@ -973,9 +1013,26 @@
             });
         }
 
-        function createHeader(text = '', x = 0, y = 0) {
+        function createHeader(text = '') {
+            const canvasRect = canvas.getBoundingClientRect();
             const header = document.createElement('div');
             header.className = 'header';
+            header.innerHTML = `
+                <span class="delete-btn">&times;</span>
+                <span class="header-text" contenteditable="false">Header</span>
+            `;
+            
+            // Add header to canvas temporarily to get its dimensions
+            header.style.visibility = 'hidden';
+            canvas.appendChild(header);
+            const headerRect = header.getBoundingClientRect();
+            
+            // Calculate centered position
+            const x = lastMouseX - canvasRect.left + canvas.scrollLeft - (headerRect.width / 2);
+            const y = lastMouseY - canvasRect.top + canvas.scrollTop - (headerRect.height / 2);
+            
+            // Make header visible and update its position
+            header.style.visibility = 'visible';
             header.innerHTML = `
                 <span class="delete-btn">&times;</span>
                 <span class="header-text" contenteditable="false">Header</span>
@@ -1009,6 +1066,15 @@
                 window.getSelection().selectAllChildren(headerText);
             }
         }
+
+        // Track mouse position
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        
+        canvas.addEventListener('mousemove', (e) => {
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+        });
 
         // Make canvas droppable for items from agenda
         canvas.addEventListener('dragover', (e) => {
