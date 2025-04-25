@@ -307,7 +307,7 @@
 
             // Add time slots from 7AM to 9PM
             for (let hour = 7; hour <= 21; hour++) {
-                const formattedHour = hour > 12 ? (hour - 12) + ' PM' : hour + ' AM';
+                const formattedHour = hour >= 12 ? (hour - 12) + ' PM' : hour + ' AM';
                 const timeSlot = document.createElement('div');
                 timeSlot.className = 'time-slot';
                 timeSlot.dataset.hour = hour;
