@@ -55,7 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Add ESC key functionality
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      allModals.forEach(modal => {
+      const modalsToClose = document.querySelectorAll('.modal');
+      modalsToClose.forEach(modal => {
         if (modal.style.display === 'block') {
           modal.style.opacity = '0';
           setTimeout(() => modal.style.display = 'none', 600);
@@ -243,7 +244,10 @@ document.addEventListener('DOMContentLoaded', () => {
               const tooltipRect = hitArea.getBoundingClientRect();
               dotTooltip.style.left = (tooltipRect.left + window.scrollX + tooltipRect.width / 2 + 10) + 'px';
               dotTooltip.style.top = (tooltipRect.top + window.scrollY + tooltipRect.height / 2 + 10) + 'px';
-              dotTooltip.innerHTML = Object.values(info).join('<br>');
+              const values = Object.entries(info).map(([key, value]) => {
+                return key === 'role' ? `Role: ${value}` : value;
+              });
+              dotTooltip.innerHTML = values.join('<br>');
               dotTooltip.style.opacity = 1; // Trigger fade-in animation
 
               showTooltipTimeoutId = null; // Timeout has executed.
