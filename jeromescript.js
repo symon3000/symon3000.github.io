@@ -48,6 +48,53 @@ function createClock(id, timezoneOffset) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Modal functionality
+  const cornerTexts = document.querySelectorAll('.corner-text');
+  const allModals = document.querySelectorAll('.modal');
+
+  // Add ESC key functionality
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      allModals.forEach(modal => {
+        if (modal.style.display === 'block') {
+          modal.style.opacity = '0';
+          setTimeout(() => modal.style.display = 'none', 600);
+        }
+      });
+    }
+  });
+
+  cornerTexts.forEach(text => {
+    text.addEventListener('click', () => {
+      const modalId = text.textContent.toLowerCase().replace(/\s+/g, '-') + '-modal';
+      const modal = document.getElementById(modalId);
+      modal.style.display = 'block';
+      setTimeout(() => modal.style.opacity = '1', 10);
+    });
+  });
+
+  const modals = document.querySelectorAll('.modal');
+  const closes = document.querySelectorAll('.close');
+
+  function closeModal(modal) {
+    modal.style.opacity = '0';
+    setTimeout(() => modal.style.display = 'none', 600);
+  }
+
+  closes.forEach(close => {
+    close.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeModal(close.closest('.modal'));
+    });
+  });
+
+  modals.forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal(modal);
+      }
+    });
+  });
   createClock('nyc-clock', -4); // EDT
   createClock('paris-clock', 2); // CEST
 });
@@ -126,6 +173,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
           dotElement.classList.add('property-dot');
 
+          // Create modal for this property
+          const propertyModal = document.createElement('div');
+          propertyModal.className = 'modal property-modal';
+          const modalContent = document.createElement('div');
+          modalContent.className = 'modal-content';
+          const closeBtn = document.createElement('span');
+          closeBtn.className = 'close';
+          closeBtn.innerHTML = '&times;';
+          
+          const modalTitle = document.createElement('h2');
+          modalTitle.textContent = info.address;
+          const modalDetails = document.createElement('div');
+          modalDetails.innerHTML = `
+            <p>Type: ${info.type}</p>
+            <p>Size: ${info.sqft}</p>
+            <p>Price: ${info.price}</p>
+            <p>Role: ${info.role}</p>
+          `;
+          
+          modalContent.appendChild(closeBtn);
+          modalContent.appendChild(modalTitle);
+          modalContent.appendChild(modalDetails);
+          propertyModal.appendChild(modalContent);
+          document.body.appendChild(propertyModal);
+
           const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "circle");
           const dotBBox = dotElement.getBBox();
           hitArea.setAttribute("cx", String(dotBBox.x + dotBBox.width / 2));
@@ -187,6 +259,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. Hide the tooltip.
             hideTooltip();
+          });
+
+          // Modal handling for property dots
+          hitArea.addEventListener('click', () => {
+            propertyModal.style.display = 'block';
+            setTimeout(() => propertyModal.style.opacity = '1', 10);
+          });
+
+          closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            propertyModal.style.opacity = '0';
+            setTimeout(() => propertyModal.style.display = 'none', 600);
+          });
+
+          propertyModal.addEventListener('click', (e) => {
+            if (e.target === propertyModal) {
+              propertyModal.style.opacity = '0';
+              setTimeout(() => propertyModal.style.display = 'none', 600);
+            }
           });
         });
       })
