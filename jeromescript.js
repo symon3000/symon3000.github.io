@@ -1,51 +1,28 @@
-// Clock functionality
-function createClock(id, timezoneOffset) {
-  const clock = document.getElementById(id);
-  const hands = {
-    hour: document.createElement('div'),
-    minute: document.createElement('div'),
-    second: document.createElement('div')
-  };
 
-  Object.entries(hands).forEach(([type, element]) => {
-    element.className = `hand ${type}-hand`;
-    element.style.position = 'absolute';
-    element.style.bottom = '50%';
-    element.style.left = '50%';
-    element.style.transformOrigin = '50% 100%';
-    element.style.width = '1.5px';
-    element.style.backgroundColor = '#333';
 
-    if (type === 'hour') {
-      element.style.height = '25%';
-      element.style.backgroundColor = '#000';
-    } else if (type === 'minute') {
-      element.style.height = '35%';
-    } else {
-      element.style.height = '40%';
-      element.style.backgroundColor = '#888';
-    }
-
-    clock.appendChild(element);
+function updateTimes() {
+  const nycTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'America/New_York',
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+  
+  const parisTime = new Date().toLocaleTimeString('en-US', {
+    timeZone: 'Europe/Paris',
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
   });
 
-  function updateClock() {
-    const now = new Date();
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const cityTime = new Date(utc + (3600000 * timezoneOffset));
-
-    const seconds = cityTime.getSeconds();
-    const minutes = cityTime.getMinutes();
-    const hours = cityTime.getHours();
-
-    hands.second.style.transform = `rotate(${(seconds * 6)}deg)`;
-    hands.minute.style.transform = `rotate(${(minutes * 6) + (seconds * 0.1)}deg)`;
-    hands.hour.style.transform = `rotate(${(hours * 30) + (minutes * 0.5)}deg)`;
-  }
-
-  setInterval(updateClock, 1000);
-  updateClock();
+  document.getElementById('nyc-time').textContent = nycTime;
+  document.getElementById('paris-time').textContent = parisTime;
 }
+
+setInterval(updateTimes, 1000);
+updateTimes();
 
 document.addEventListener('DOMContentLoaded', () => {
   // Modal functionality
@@ -96,8 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
-  createClock('nyc-clock', -4); // EDT
-  createClock('paris-clock', 2); // CEST
+  
 });
 
 // 1) Property data
@@ -182,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const closeBtn = document.createElement('span');
           closeBtn.className = 'close';
           closeBtn.innerHTML = '&times;';
-          
+
           const modalTitle = document.createElement('h2');
           modalTitle.textContent = info.address;
           const modalDetails = document.createElement('div');
@@ -192,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>Price: ${info.price}</p>
             <p>Role: ${info.role}</p>
           `;
-          
+
           modalContent.appendChild(closeBtn);
           modalContent.appendChild(modalTitle);
           modalContent.appendChild(modalDetails);
