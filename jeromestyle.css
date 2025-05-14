@@ -29,6 +29,29 @@ body {
   position: relative;
 }
 
+.time-display {
+  position: fixed;
+  font-weight: 200;
+  letter-spacing: 0.1em;
+  padding: 2rem;
+  font-size: 0.85rem;
+  opacity: 0;
+  animation: fadeIn 2s ease-in forwards;
+  writing-mode: vertical-lr;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.time-display.left {
+  left: 0;
+  transform: translateY(-50%) rotate(0deg);
+}
+
+.time-display.right {
+  right: 0;
+  transform: translateY(-50%) rotate(180deg);
+}
+
 .corner-text {
   position: fixed;
   font-weight: 200;
@@ -38,8 +61,7 @@ body {
   z-index: 100;
   font-size: 0.85rem;
   opacity: 0;
-  animation: fadeIn 1s ease-in forwards;
-  animation-delay: 4s;
+  animation: fadeIn 2s ease-in forwards;
 }
 
 .top-left {
@@ -111,22 +133,6 @@ body {
   line-height: 1.6;
 }
 
-.clocks {
-  display: flex;
-  gap: 5vw;
-  margin-bottom: 2rem;
-  width: 100%;
-  justify-content: center;
-}
-
-.clocks .clock-container {
-  width: 40vw;
-  max-width: 800px;
-  min-width: 280px;
-  display: flex;
-  justify-content: center;
-}
-
 .maps {
   display: flex;
   gap: 5vw;
@@ -142,28 +148,6 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-}
-
-.clock-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.clock {
-  width: 120px;
-  height: 120px;
-  border: 1.5px solid #333;
-  border-radius: 50%;
-  position: relative;
-  margin: 0 auto;
-}
-
-.city-label {
-  margin-top: 1.5rem;
-  font-weight: 200;
-  letter-spacing: 0.1em;
 }
 
 .map {
