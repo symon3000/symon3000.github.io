@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artist Name</title>
+    <title>Christmas R. Williamsburg</title>
     <style>
         * {
             margin: 0;
@@ -329,8 +329,25 @@
         function showArtworkDetail(artworkId) {
             const artwork = artworks[artworkId];
             if (artwork) {
-                detailImage.src = artwork.image;
-                detailImage.alt = artwork.title;
+                // Clear and populate detail images
+                detailImages.innerHTML = '';
+                
+                // Add main clean image
+                const mainImage = document.createElement('img');
+                mainImage.src = artwork.cleanImage;
+                mainImage.alt = artwork.title;
+                mainImage.className = 'main-detail-image';
+                detailImages.appendChild(mainImage);
+                
+                // Add mockup image if it exists
+                if (artwork.mockupImage) {
+                    const mockupImage = document.createElement('img');
+                    mockupImage.src = artwork.mockupImage;
+                    mockupImage.alt = `${artwork.title} mockup`;
+                    mockupImage.className = 'mockup-detail-image';
+                    detailImages.appendChild(mockupImage);
+                }
+                
                 detailTitle.textContent = artwork.title;
                 detailDescription.textContent = artwork.description;
                 detailView.style.display = 'block';
