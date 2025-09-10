@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Name</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: white;
+            color: black;
+            font-weight: 300;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 60px;
+            margin-bottom: 80px;
+        }
+
+        .artwork-item {
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .artwork-item:hover {
+            opacity: 0.7;
+        }
+
+        .artwork-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border: 1px solid #f0f0f0;
+        }
+
+        .artwork-title {
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        /* Detail View */
+        .detail-view {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: white;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .detail-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            justify-content: center;
+        }
+
+        .detail-image {
+            max-width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            margin-bottom: 40px;
+        }
+
+        .detail-info {
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .detail-title {
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        .detail-description {
+            font-size: 14px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .size-options {
+            margin-bottom: 30px;
+        }
+
+        .size-label {
+            font-size: 12px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .size-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .size-btn {
+            padding: 8px 16px;
+            border: 1px solid black;
+            background: white;
+            color: black;
+            font-size: 12px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .size-btn:hover,
+        .size-btn.active {
+            background: black;
+            color: white;
+        }
+
+        .buy-button {
+            padding: 12px 30px;
+            border: 1px solid black;
+            background: white;
+            color: black;
+            font-size: 12px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .buy-button:hover {
+            background: black;
+            color: white;
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: black;
+            z-index: 1001;
+        }
+
+        .close-btn:hover {
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+            
+            .gallery {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .detail-container {
+                padding: 40px 20px;
+            }
+            
+            .close-btn {
+                top: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Artist Name</h1>
+        </header>
+
+        <div class="gallery" id="gallery">
+            <!-- Gallery items will be loaded dynamically from the friendSite folder -->
+        </div>
+    </div>
+
+    <!-- Detail View -->
+    <div class="detail-view" id="detailView">
+        <button class="close-btn" id="closeBtn">&times;</button>
+        <div class="detail-container">
+            <img id="detailImage" class="detail-image" src="" alt="">
+            <div class="detail-info">
+                <h2 id="detailTitle" class="detail-title"></h2>
+                <p id="detailDescription" class="detail-description"></p>
+                
+                <div class="size-options">
+                    <label class="size-label">Size</label>
+                    <div class="size-buttons">
+                        <button class="size-btn active" data-size="small">8" × 10"</button>
+                        <button class="size-btn" data-size="medium">11" × 14"</button>
+                        <button class="size-btn" data-size="large">16" × 20"</button>
+                        <button class="size-btn" data-size="xlarge">20" × 24"</button>
+                    </div>
+                </div>
+                
+                <button class="buy-button" id="buyButton">Purchase Print</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample artwork data
+        const artworks = {
+            '1': {
+                title: 'Abstract Composition I',
+                description: 'An exploration of form through negative space and subtle contrast.',
+                image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=1000&fit=crop'
+            },
+            '2': {
+                title: 'Minimalist Study',
+                description: 'Finding beauty in the intersection of simplicity and intention.',
+                image: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=1000&fit=crop'
+            },
+            '3': {
+                title: 'Form and Space',
+                description: 'A meditation on the relationship between presence and absence.',
+                image: 'https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=1000&fit=crop'
+            },
+            '4': {
+                title: 'Untitled Series III',
+                description: 'Part of an ongoing investigation into pure geometric relationships.',
+                image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=1000&fit=crop&seed=2'
+            },
+            '5': {
+                title: 'Geometric Harmony',
+                description: 'Balance achieved through careful consideration of proportion and void.',
+                image: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=1000&fit=crop&seed=3'
+            },
+            '6': {
+                title: 'Silence',
+                description: 'A quiet moment captured in charcoal and deliberate restraint.',
+                image: 'https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=1000&fit=crop&seed=4'
+            }
+        };
+
+        // DOM elements
+        const gallery = document.getElementById('gallery');
+        const detailView = document.getElementById('detailView');
+        const closeBtn = document.getElementById('closeBtn');
+        const detailImage = document.getElementById('detailImage');
+        const detailTitle = document.getElementById('detailTitle');
+        const detailDescription = document.getElementById('detailDescription');
+        const buyButton = document.getElementById('buyButton');
+        const sizeButtons = document.querySelectorAll('.size-btn');
+
+        let selectedSize = 'small';
+
+        // Gallery click handlers
+        gallery.addEventListener('click', (e) => {
+            const artworkItem = e.target.closest('.artwork-item');
+            if (artworkItem) {
+                const artworkId = artworkItem.dataset.artwork;
+                showArtworkDetail(artworkId);
+            }
+        });
+
+        // Close detail view
+        closeBtn.addEventListener('click', closeDetailView);
+        detailView.addEventListener('click', (e) => {
+            if (e.target === detailView) {
+                closeDetailView();
+            }
+        });
+
+        // Size selection
+        sizeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sizeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedSize = btn.dataset.size;
+            });
+        });
+
+        // Buy button
+        buyButton.addEventListener('click', () => {
+            // This would integrate with your third-party print service
+            alert(`Proceeding to purchase ${detailTitle.textContent} - Size: ${document.querySelector('.size-btn.active').textContent}`);
+        });
+
+        function showArtworkDetail(artworkId) {
+            const artwork = artworks[artworkId];
+            if (artwork) {
+                detailImage.src = artwork.image;
+                detailImage.alt = artwork.title;
+                detailTitle.textContent = artwork.title;
+                detailDescription.textContent = artwork.description;
+                detailView.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeDetailView() {
+            detailView.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && detailView.style.display === 'block') {
+                closeDetailView();
+            }
+        });
+    </script>
+</body>
+</html>
