@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Christmas R. Williamsburg</title>
+    <title>Christmas R. Williamsburgh</title>
     <style>
         * {
             margin: 0;
@@ -47,17 +47,41 @@
         .artwork-item {
             cursor: pointer;
             transition: opacity 0.3s ease;
+            position: relative;
         }
 
         .artwork-item:hover {
             opacity: 0.7;
         }
 
-        .artwork-image {
+        .artwork-image-container {
+            position: relative;
             width: 100%;
             height: 400px;
-            object-fit: cover;
+            overflow: hidden;
             border: 1px solid #f0f0f0;
+        }
+
+        .artwork-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.4s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .artwork-image.mockup {
+            opacity: 0;
+        }
+
+        .artwork-item:hover .artwork-image.main {
+            opacity: 0;
+        }
+
+        .artwork-item:hover .artwork-image.mockup {
+            opacity: 1;
         }
 
         .artwork-title {
@@ -92,11 +116,30 @@
             justify-content: center;
         }
 
-        .detail-image {
-            max-width: 100%;
+        .detail-images {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            align-items: flex-start;
+        }
+
+        .detail-main-image {
+            max-width: 500px;
             max-height: 60vh;
             object-fit: contain;
-            margin-bottom: 40px;
+        }
+
+        .detail-mockup-thumbnail {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .detail-mockup-thumbnail:hover {
+            opacity: 0.7;
         }
 
         .detail-info {
@@ -205,6 +248,16 @@
                 padding: 40px 20px;
             }
             
+            .detail-images {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .detail-main-image {
+                max-width: 100%;
+            }
+            
             .close-btn {
                 top: 20px;
                 right: 20px;
@@ -215,11 +268,57 @@
 <body>
     <div class="container">
         <header>
-            <h1>Artist Name</h1>
+            <h1>Christmas R. Williamsburgh</h1>
         </header>
 
         <div class="gallery" id="gallery">
-            <!-- Gallery items will be loaded dynamically from the friendSite folder -->
+            <div class="artwork-item" data-artwork="1">
+                <div class="artwork-image-container">
+                    <img src="chrisClean/artwork1.png" alt="Abstract Composition I" class="artwork-image main">
+                    <img src="chrisMockups/artwork1.png" alt="Abstract Composition I Mockup" class="artwork-image mockup">
+                </div>
+                <div class="artwork-title">Abstract Composition I</div>
+            </div>
+
+            <div class="artwork-item" data-artwork="2">
+                <div class="artwork-image-container">
+                    <img src="chrisClean/artwork2.png" alt="Minimalist Study" class="artwork-image main">
+                    <img src="chrisMockups/artwork2.png" alt="Minimalist Study Mockup" class="artwork-image mockup">
+                </div>
+                <div class="artwork-title">Minimalist Study</div>
+            </div>
+
+            <div class="artwork-item" data-artwork="3">
+                <div class="artwork-image-container">
+                    <img src="chrisClean/artwork3.png" alt="Form and Space" class="artwork-image main">
+                    <img src="chrisMockups/artwork3.png" alt="Form and Space Mockup" class="artwork-image mockup">
+                </div>
+                <div class="artwork-title">Form and Space</div>
+            </div>
+
+            <div class="artwork-item" data-artwork="4">
+                <div class="artwork-image-container">
+                    <img src="chrisClean/artwork4.png" alt="Untitled Series III" class="artwork-image main">
+                    <img src="chrisMockups/artwork4.png" alt="Untitled Series III Mockup" class="artwork-image mockup">
+                </div>
+                <div class="artwork-title">Untitled Series III</div>
+            </div>
+
+            <div class="artwork-item" data-artwork="5">
+                <div class="artwork-image-container">
+                    <img src="chrisClean/artwork5.png" alt="Geometric Harmony" class="artwork-image main">
+                    <img src="chrisMockups/artwork5.png" alt="Geometric Harmony Mockup" class="artwork-image mockup">
+                </div>
+                <div class="artwork-title">Geometric Harmony</div>
+            </div>
+
+            <div class="artwork-item" data-artwork="6">
+                <div class="artwork-image-container">
+                    <img src="chrisClean/artwork6.png" alt="Silence" class="artwork-image main">
+                    <img src="chrisMockups/artwork6.png" alt="Silence Mockup" class="artwork-image mockup">
+                </div>
+                <div class="artwork-title">Silence</div>
+            </div>
         </div>
     </div>
 
@@ -227,7 +326,10 @@
     <div class="detail-view" id="detailView">
         <button class="close-btn" id="closeBtn">&times;</button>
         <div class="detail-container">
-            <img id="detailImage" class="detail-image" src="" alt="">
+            <div class="detail-images">
+                <img id="detailMainImage" class="detail-main-image" src="" alt="">
+                <img id="detailMockupThumbnail" class="detail-mockup-thumbnail" src="" alt="" title="Click to view mockup">
+            </div>
             <div class="detail-info">
                 <h2 id="detailTitle" class="detail-title"></h2>
                 <p id="detailDescription" class="detail-description"></p>
@@ -253,32 +355,56 @@
             '1': {
                 title: 'Abstract Composition I',
                 description: 'An exploration of form through negative space and subtle contrast.',
-                image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=1000&fit=crop'
+                mainImage: 'chrisClean/artwork1.png',
+                mockupImage: 'chrisMockups/artwork1.png'
             },
             '2': {
                 title: 'Minimalist Study',
                 description: 'Finding beauty in the intersection of simplicity and intention.',
-                image: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=1000&fit=crop'
+                mainImage: 'chrisClean/artwork2.png',
+                mockupImage: 'chrisMockups/artwork2.png'
             },
             '3': {
                 title: 'Form and Space',
                 description: 'A meditation on the relationship between presence and absence.',
-                image: 'https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=1000&fit=crop'
+                mainImage: 'chrisClean/artwork3.png',
+                mockupImage: 'chrisMockups/artwork3.png'
             },
             '4': {
                 title: 'Untitled Series III',
                 description: 'Part of an ongoing investigation into pure geometric relationships.',
-                image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=1000&fit=crop&seed=2'
+                mainImage: 'chrisClean/artwork4.png',
+                mockupImage: 'chrisMockups/artwork4.png'
             },
             '5': {
                 title: 'Geometric Harmony',
                 description: 'Balance achieved through careful consideration of proportion and void.',
-                image: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=1000&fit=crop&seed=3'
+                mainImage: 'chrisClean/artwork5.png',
+                mockupImage: 'chrisMockups/artwork5.png'
             },
             '6': {
                 title: 'Silence',
                 description: 'A quiet moment captured in charcoal and deliberate restraint.',
-                image: 'https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&h=1000&fit=crop&seed=4'
+                mainImage: 'chrisClean/artwork6.png',
+                mockupImage: 'chrisMockups/artwork6.png'
+            },
+            '7': {
+                title: 'Meditation VII',
+                description: 'Contemplating the essence of spatial relationships.',
+                mainImage: 'chrisClean/artwork7.png',
+                mockupImage: 'chrisMockups/artwork7.png'
+            },
+            '8': {
+                title: 'Elemental',
+                description: 'Reducing complexity to reveal fundamental truths.',
+                mainImage: 'chrisClean/artwork8.png',
+                mockupImage: 'chrisMockups/artwork8.png'
+            },
+            '9': {
+                title: 'Convergence',
+                description: 'Where intention meets the infinite possibility of space.',
+                mainImage: 'chrisClean/artwork9.png',
+                mockupImage: 'chrisMockups/artwork9.png'
             }
         };
 
@@ -286,13 +412,15 @@
         const gallery = document.getElementById('gallery');
         const detailView = document.getElementById('detailView');
         const closeBtn = document.getElementById('closeBtn');
-        const detailImage = document.getElementById('detailImage');
+        const detailMainImage = document.getElementById('detailMainImage');
+        const detailMockupThumbnail = document.getElementById('detailMockupThumbnail');
         const detailTitle = document.getElementById('detailTitle');
         const detailDescription = document.getElementById('detailDescription');
         const buyButton = document.getElementById('buyButton');
         const sizeButtons = document.querySelectorAll('.size-btn');
 
         let selectedSize = 'small';
+        let currentArtwork = null;
 
         // Gallery click handlers
         gallery.addEventListener('click', (e) => {
@@ -326,28 +454,29 @@
             alert(`Proceeding to purchase ${detailTitle.textContent} - Size: ${document.querySelector('.size-btn.active').textContent}`);
         });
 
+        // Mockup thumbnail click handler
+        detailMockupThumbnail.addEventListener('click', () => {
+            if (currentArtwork) {
+                // Swap the images
+                const tempSrc = detailMainImage.src;
+                const tempAlt = detailMainImage.alt;
+                
+                detailMainImage.src = detailMockupThumbnail.src;
+                detailMainImage.alt = detailMockupThumbnail.alt;
+                
+                detailMockupThumbnail.src = tempSrc;
+                detailMockupThumbnail.alt = tempAlt;
+            }
+        });
+
         function showArtworkDetail(artworkId) {
             const artwork = artworks[artworkId];
             if (artwork) {
-                // Clear and populate detail images
-                detailImages.innerHTML = '';
-                
-                // Add main clean image
-                const mainImage = document.createElement('img');
-                mainImage.src = artwork.cleanImage;
-                mainImage.alt = artwork.title;
-                mainImage.className = 'main-detail-image';
-                detailImages.appendChild(mainImage);
-                
-                // Add mockup image if it exists
-                if (artwork.mockupImage) {
-                    const mockupImage = document.createElement('img');
-                    mockupImage.src = artwork.mockupImage;
-                    mockupImage.alt = `${artwork.title} mockup`;
-                    mockupImage.className = 'mockup-detail-image';
-                    detailImages.appendChild(mockupImage);
-                }
-                
+                currentArtwork = artwork;
+                detailMainImage.src = artwork.mainImage;
+                detailMainImage.alt = artwork.title;
+                detailMockupThumbnail.src = artwork.mockupImage;
+                detailMockupThumbnail.alt = artwork.title + ' Mockup';
                 detailTitle.textContent = artwork.title;
                 detailDescription.textContent = artwork.description;
                 detailView.style.display = 'block';
@@ -358,6 +487,7 @@
         function closeDetailView() {
             detailView.style.display = 'none';
             document.body.style.overflow = 'auto';
+            currentArtwork = null;
         }
 
         // Keyboard navigation
