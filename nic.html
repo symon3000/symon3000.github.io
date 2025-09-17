@@ -67,8 +67,7 @@
       card.classList.toggle('is-flipped');
     });
 
-    // Scroll to flip
-    let lastScroll = 0;
+    // Scroll to flip (desktop)
     window.addEventListener('wheel', (e) => {
       if (e.deltaY > 0) {
         card.classList.add('is-flipped');
@@ -76,6 +75,30 @@
         card.classList.remove('is-flipped');
       }
     });
+
+    // Touch swipe to flip (mobile)
+    let touchStartY = 0;
+    let touchEndY = 0;
+
+    window.addEventListener('touchstart', (e) => {
+      touchStartY = e.changedTouches[0].screenY;
+    });
+
+    window.addEventListener('touchend', (e) => {
+      touchEndY = e.changedTouches[0].screenY;
+      handleGesture();
+    });
+
+    function handleGesture() {
+      const deltaY = touchStartY - touchEndY;
+      if (deltaY > 30) {
+        // swipe up
+        card.classList.add('is-flipped');
+      } else if (deltaY < -30) {
+        // swipe down
+        card.classList.remove('is-flipped');
+      }
+    }
   </script>
 </body>
 </html>
