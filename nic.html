@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Julian Partners</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      background: #f4f4f4;
+      font-family: sans-serif;
+    }
+    .card-container {
+      perspective: 1000px;
+    }
+    .card {
+      width: 350px;
+      height: 430px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s;
+      cursor: pointer;
+    }
+    .card.is-flipped {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .card-face img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="card-container">
+    <div class="card" id="flipCard">
+      <div class="card-face card-front">
+        <img src="JP-RX.png" alt="Front of Card">
+      </div>
+      <div class="card-face card-back">
+        <img src="JP-RX-Back.png" alt="Back of Card">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const card = document.getElementById('flipCard');
+
+    // Click to flip
+    card.addEventListener('click', () => {
+      card.classList.toggle('is-flipped');
+    });
+
+    // Scroll to flip
+    let lastScroll = 0;
+    window.addEventListener('wheel', (e) => {
+      if (e.deltaY > 0) {
+        card.classList.add('is-flipped');
+      } else if (e.deltaY < 0) {
+        card.classList.remove('is-flipped');
+      }
+    });
+  </script>
+</body>
+</html>
