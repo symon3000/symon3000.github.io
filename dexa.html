@@ -1,0 +1,507 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEXA Body Composition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #fafafa;
+            color: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 2rem;
+        }
+
+        .container {
+            display: flex;
+            gap: 4rem;
+            align-items: center;
+            justify-content: center;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 340px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .stats-title {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 1.5rem;
+            transition: opacity 0.4s ease;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 1rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: rgba(0, 0, 0, 0.4);
+            font-weight: 400;
+            transition: opacity 0.4s ease;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: rgba(0, 0, 0, 0.85);
+            transition: opacity 0.4s ease;
+        }
+
+        .stat-value.large {
+            font-size: 2.25rem;
+        }
+
+        .stat-value.highlight {
+            font-weight: 400;
+            color: rgba(0, 0, 0, 0.95);
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(0, 0, 0, 0.08);
+            margin: 1.25rem 0;
+        }
+
+        .body-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-width: 0;
+            aspect-ratio: 1;
+            max-width: min(1024px, 60vh);
+            max-height: min(1024px, 60vh);
+        }
+
+        .body-container object {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 2px 16px rgba(0, 0, 0, 0.04));
+        }
+
+        .mobile-hint {
+            display: none;
+        }
+
+        /* Tablet and below */
+        @media (max-width: 1024px) {
+            body {
+                padding: 0;
+                align-items: stretch;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .container {
+                flex-direction: column;
+                gap: 0;
+                max-width: 100%;
+                align-items: center;
+                justify-content: space-evenly;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .stats-panel {
+                position: relative;
+                width: 100%;
+                max-width: 500px;
+                border-radius: 0 0 12px 12px;
+                border-top: none;
+                padding: 1rem 1.5rem;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(10px);
+                flex-shrink: 0;
+            }
+
+            .stats-title {
+                margin-bottom: 0.75rem;
+                font-size: 0.65rem;
+            }
+
+            .stat-row {
+                margin-bottom: 0.6rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+            }
+
+            .stat-value {
+                font-size: 1.2rem;
+            }
+
+            .stat-value.large {
+                font-size: 1.75rem;
+            }
+
+            .divider {
+                margin: 0.6rem 0;
+            }
+
+            .body-container {
+                width: 100%;
+                flex: 1;
+                min-height: 0;
+                max-width: 90vw;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+
+            .body-container object {
+                width: auto;
+                height: 100%;
+                max-width: 100%;
+                max-height: 100%;
+            }
+        }
+
+        /* Mobile phones */
+        @media (max-width: 640px) {
+            .stats-panel {
+                padding: 0.85rem 1rem;
+                max-width: 400px;
+            }
+
+            .stat-row {
+                margin-bottom: 0.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            .stat-value {
+                font-size: 1.1rem;
+            }
+
+            .stat-value.large {
+                font-size: 1.6rem;
+            }
+
+            .divider {
+                margin: 0.5rem 0;
+            }
+        }
+
+        /* iPhone 4 and very small screens */
+        @media (max-width: 360px) {
+            .stats-panel {
+                padding: 0.75rem 0.85rem;
+                max-width: 340px;
+            }
+
+            .stats-title {
+                font-size: 0.6rem;
+                margin-bottom: 0.6rem;
+            }
+
+            .stat-row {
+                margin-bottom: 0.45rem;
+            }
+
+            .stat-label {
+                font-size: 0.65rem;
+            }
+
+            .stat-value {
+                font-size: 1rem;
+            }
+
+            .stat-value.large {
+                font-size: 1.5rem;
+            }
+
+            .divider {
+                margin: 0.45rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="stats-panel">
+            <h3 class="stats-title" id="part-name">Total Body</h3>
+            <div class="stat-row">
+                <span class="stat-label">Body Fat</span>
+                <span class="stat-value large" id="fat-percent">22.8%</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Fat Mass</span>
+                <span class="stat-value" id="fat-lbs">34.1 lbs</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Lean Mass</span>
+                <span class="stat-value" id="lean-lbs">109.4 lbs</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Bone Mineral Content</span>
+                <span class="stat-value" id="bmc-lbs">5.9 lbs</span>
+            </div>
+            <div class="divider"></div>
+            <div class="stat-row">
+                <span class="stat-label">Total Mass</span>
+                <span class="stat-value highlight" id="total-lbs">149.4 lbs</span>
+            </div>
+        </div>
+
+        <div class="body-container">
+            <object id="bodyFrame" data="bodyFrame.svg" type="image/svg+xml"></object>
+        </div>
+    </div>
+
+    <script>
+        // DEXA scan data
+        const bodyData = {
+            'trunk-left': { name: 'Trunk Left', fat: 22.8, fatLbs: 8.7, lean: 28.5, bmc: 0.8, total: 37.9 },
+            'trunk-right': { name: 'Trunk Right', fat: 21.8, fatLbs: 7.7, lean: 26.7, bmc: 0.8, total: 35.2 },
+            'arm-left': { name: 'Arm Left', fat: 21.4, fatLbs: 2.2, lean: 7.8, bmc: 0.5, total: 10.5 },
+            'arm-right': { name: 'Arm Right', fat: 18.9, fatLbs: 2.0, lean: 8.2, bmc: 0.5, total: 10.7 },
+            'leg-left': { name: 'Leg Left', fat: 26.7, fatLbs: 5.8, lean: 15.0, bmc: 1.1, total: 21.9 },
+            'leg-right': { name: 'Leg Right', fat: 25.1, fatLbs: 5.8, lean: 16.2, bmc: 1.1, total: 23.2 },
+            'total': { name: 'Total Body', fat: 22.8, fatLbs: 34.1, lean: 109.4, bmc: 5.9, total: 149.4 }
+        };
+
+        // Track which part is currently active (for mobile)
+        let activePart = null;
+        const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+
+        function animateNumber(element, start, end, suffix = '', duration = 600) {
+            const startTime = performance.now();
+            const range = end - start;
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Ease out function for smoother animation
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                
+                const current = start + (range * easeProgress);
+                element.textContent = current.toFixed(1) + suffix;
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        function updateStats(data) {
+            // Update part name with fade
+            const partName = document.getElementById('part-name');
+            partName.style.opacity = '0';
+            setTimeout(() => {
+                partName.textContent = data.name;
+                partName.style.opacity = '1';
+            }, 200);
+
+            // Animate numbers
+            const fatPercent = document.getElementById('fat-percent');
+            const fatLbs = document.getElementById('fat-lbs');
+            const leanLbs = document.getElementById('lean-lbs');
+            const bmcLbs = document.getElementById('bmc-lbs');
+            const totalLbs = document.getElementById('total-lbs');
+
+            // Parse current values
+            const currentFat = parseFloat(fatPercent.textContent) || data.fat;
+            const currentFatLbs = parseFloat(fatLbs.textContent) || data.fatLbs;
+            const currentLean = parseFloat(leanLbs.textContent) || data.lean;
+            const currentBmc = parseFloat(bmcLbs.textContent) || data.bmc;
+            const currentTotal = parseFloat(totalLbs.textContent) || data.total;
+
+            // Animate to new values
+            animateNumber(fatPercent, currentFat, data.fat, '%');
+            animateNumber(fatLbs, currentFatLbs, data.fatLbs, ' lbs');
+            animateNumber(leanLbs, currentLean, data.lean, ' lbs');
+            animateNumber(bmcLbs, currentBmc, data.bmc, ' lbs');
+            animateNumber(totalLbs, currentTotal, data.total, ' lbs');
+        }
+
+        // Wait for SVG to load
+        const svgObject = document.getElementById('bodyFrame');
+
+        svgObject.addEventListener('load', function() {
+            const svgDoc = svgObject.contentDocument || svgObject.getSVGDocument();
+
+            if (!svgDoc) {
+                console.error('Could not access SVG document. This might be a CORS issue.');
+                return;
+            }
+
+            // Function to make an element interactive
+            function makeInteractive(element, dataKey, bodyOutline, allParts) {
+                if (!element) return;
+
+                // Make it look clickable
+                element.style.cursor = 'pointer';
+
+                // Hide parts by default (only outline visible)
+                element.setAttribute('fill-opacity', '0');
+                element.setAttribute('stroke-opacity', '0');
+                element.style.transition = 'fill-opacity 0.5s ease, stroke-opacity 0.5s ease';
+
+                // Desktop: hover behavior
+                element.addEventListener('mouseenter', () => {
+                    if (isMobile) return; // Skip on mobile
+                    
+                    updateStats(bodyData[dataKey]);
+
+                    // Show this part
+                    element.setAttribute('fill-opacity', '1');
+                    element.setAttribute('stroke-opacity', '1');
+
+                    // Fade body outline
+                    if (bodyOutline) {
+                        bodyOutline.setAttribute('stroke-opacity', '0.15');
+                    }
+                });
+
+                element.addEventListener('mouseleave', () => {
+                    if (isMobile) return; // Skip on mobile
+                    
+                    updateStats(bodyData.total);
+
+                    // Hide this part
+                    element.setAttribute('fill-opacity', '0');
+                    element.setAttribute('stroke-opacity', '0');
+
+                    // Restore body outline
+                    if (bodyOutline) {
+                        bodyOutline.setAttribute('stroke-opacity', '1');
+                    }
+                });
+
+                // Mobile: tap/touch behavior
+                element.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); // Prevent double-tap zoom
+                    
+                    // If this part is already active, deactivate it
+                    if (activePart === dataKey) {
+                        // Reset to total body
+                        updateStats(bodyData.total);
+                        element.setAttribute('fill-opacity', '0');
+                        element.setAttribute('stroke-opacity', '0');
+                        if (bodyOutline) {
+                            bodyOutline.setAttribute('stroke-opacity', '1');
+                        }
+                        activePart = null;
+                    } else {
+                        // Deactivate previous part
+                        if (activePart) {
+                            allParts.forEach(part => {
+                                part.element.setAttribute('fill-opacity', '0');
+                                part.element.setAttribute('stroke-opacity', '0');
+                            });
+                        }
+
+                        // Activate this part
+                        updateStats(bodyData[dataKey]);
+                        element.setAttribute('fill-opacity', '1');
+                        element.setAttribute('stroke-opacity', '1');
+                        if (bodyOutline) {
+                            bodyOutline.setAttribute('stroke-opacity', '0.15');
+                        }
+                        activePart = dataKey;
+                    }
+                });
+
+                // Also support click for desktop
+                element.addEventListener('click', (e) => {
+                    if (!isMobile) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            // Find and make all parts interactive
+            const partIds = [
+                'trunk-left', 'trunk-right',
+                'arm-left', 'arm-right', 
+                'leg-left', 'leg-right'
+            ];
+
+            // Get body outline reference first
+            const bodyOutline = svgDoc.getElementById('bodyOutline');
+            if (bodyOutline) {
+                // Set smooth transition on outline
+                bodyOutline.style.transition = 'stroke-opacity 0.5s ease';
+                bodyOutline.style.cursor = 'pointer';
+                
+                // Desktop hover
+                bodyOutline.addEventListener('mouseenter', () => {
+                    if (!isMobile) {
+                        updateStats(bodyData.total);
+                    }
+                });
+
+                // Mobile tap
+                bodyOutline.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    updateStats(bodyData.total);
+                    
+                    // Reset all parts
+                    partIds.forEach(partId => {
+                        const el = svgDoc.getElementById(partId);
+                        if (el) {
+                            el.setAttribute('fill-opacity', '0');
+                            el.setAttribute('stroke-opacity', '0');
+                        }
+                    });
+                    
+                    bodyOutline.setAttribute('stroke-opacity', '1');
+                    activePart = null;
+                });
+            }
+
+            // Store all part elements for cross-reference
+            const allParts = [];
+            partIds.forEach(partId => {
+                const element = svgDoc.getElementById(partId);
+                if (element) {
+                    allParts.push({ id: partId, element: element });
+                }
+            });
+
+            // Make all parts interactive
+            allParts.forEach(part => {
+                makeInteractive(part.element, part.id, bodyOutline, allParts);
+            });
+        });
+
+        svgObject.addEventListener('error', function() {
+            console.error('Failed to load SVG. Make sure bodyFrame.svg is in the same folder.');
+        });
+    </script>
+</body>
+</html>
