@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innuendo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="innuendoFav.png">
+    <meta property="og:title" content="Innuendo">
+    <meta property="og:description" content="The sound of couture.">
+    <meta property="og:image" content="https://maxcooper.co/innuendoSocial.png">
+    <meta property="og:url" content="https://innuendo.studio">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://maxcooper.co/innuendoSocial.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        body {
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            font-family: 'Inter', sans-serif;
+            background: #fff;
+            position: relative;
+        }
+
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-container {
+            width: 300px;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .logo {
+            width: 300px;
+            height: auto;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transform: translateY(100%);
+            animation: slideUp 1.75s ease-in-out 1s forwards;
+        }
+
+        .tagline {
+            font-size: 18px;
+            font-weight: 100;
+            color: #000;
+            opacity: 0;
+            animation: fadeIn 1.75s ease-in 3.75s forwards;
+            margin-top: 20px;
+        }
+
+        .h-swap {
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            width: 0.6em;
+            vertical-align: text-bottom;
+            transition: width 1s ease-in-out;
+        }
+
+        .h-swap.uppercase {
+            width: 0.75em;
+        }
+
+        .h-lower, .h-upper {
+            display: inline-block;
+        }
+
+        .h-upper {
+            position: absolute;
+            left: 0;
+            top: 0;
+            transform: translateY(100%);
+            animation: slideUpIn 1s ease-in-out 5.75s forwards;
+        }
+
+        .h-lower {
+            animation: slideUpOut 1s ease-in-out 5.75s forwards;
+        }
+
+        .period {
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .period.visible {
+            opacity: 1;
+        }
+
+        @keyframes slideUpOut {
+            to {
+                transform: translateY(-100%);
+            }
+        }
+
+        @keyframes slideUpIn {
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .client-container {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .client-box {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .client-logo {
+            position: absolute;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            opacity: 0;
+        }
+
+        .client-logo.active {
+            animation: fadeInOut 3s ease-in-out;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+            }
+            30% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        .footer.visible {
+            opacity: 1;
+        }
+
+        .footer a {
+            color: #000;
+            text-decoration: none;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+
+        .footer a:hover {
+            opacity: 1;
+        }
+
+        .footer svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                justify-content: flex-start;
+                padding-top: 10px;
+                padding-bottom: 10px;
+            }
+
+            .logo-container {
+                height: 100px;
+                width: 90vw;
+                max-width: 300px;
+            }
+
+            .logo {
+                width: 100%;
+            }
+
+            .tagline {
+                margin-top: 20px;
+            }
+
+            .client-container {
+                position: fixed;
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .footer {
+                bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="center-content">
+        <div class="logo-container">
+            <img src="innuendoLogoSVG.svg" alt="Innuendo" class="logo">
+        </div>
+        <div class="tagline">
+            <span class="h-swap">
+                <span class="h-lower">h</span>
+                <span class="h-upper">H</span>
+            </span>ouse music<span class="period">.</span>
+        </div>
+    </div>
+    
+    <div class="client-container" id="clientContainer">
+        <div class="client-box">
+            <img src="hermes.svg" alt="Hermès" class="client-logo" id="client1">
+            <img src="chanel.svg" alt="Chanel" class="client-logo" id="client2">
+            <img src="kallmeyer.svg" alt="Kallmeyer" class="client-logo" id="client3">
+        </div>
+    </div>
+
+    <div class="footer">
+        <a href="mailto:hi@innuendo.studio" aria-label="Email">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="20" x="2" y="2" rx="5"/>
+                <path d="m2 6 10 7 10-7"/>
+            </svg>
+        </a>
+        <a href="https://instagram.com/innuendo.studio" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="20" x="2" y="2" rx="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+            </svg>
+        </a>
+    </div>
+
+    <script>
+        function positionClientLogos() {
+            const tagline = document.querySelector('.tagline');
+            const clientContainer = document.getElementById('clientContainer');
+            
+            if (window.innerWidth > 768) {
+                const taglineBottom = tagline.getBoundingClientRect().bottom;
+                const windowHeight = window.innerHeight;
+                const spaceBelow = windowHeight - taglineBottom;
+                const midpoint = taglineBottom + (spaceBelow / 2);
+                
+                clientContainer.style.top = midpoint + 'px';
+            } else {
+                // Reset to CSS default for mobile
+                clientContainer.style.top = '';
+            }
+        }
+
+        // Position on load and resize
+        window.addEventListener('load', positionClientLogos);
+        window.addEventListener('resize', positionClientLogos);
+
+        // Fade in footer on first mouse movement or touch
+        let footerVisible = false;
+        function showFooter() {
+            if (!footerVisible) {
+                document.querySelector('.footer').classList.add('visible');
+                footerVisible = true;
+            }
+        }
+        window.addEventListener('mousemove', showFooter, { once: true });
+        window.addEventListener('touchstart', showFooter, { once: true });
+
+        const clients = ['client1', 'client2', 'client3'];
+        let currentIndex = 0;
+
+        function rotateClients() {
+            const currentClient = document.getElementById(clients[currentIndex]);
+            currentClient.classList.add('active');
+            
+            setTimeout(() => {
+                currentClient.classList.remove('active');
+                currentIndex = (currentIndex + 1) % clients.length;
+                setTimeout(rotateClients, 300);
+            }, 3000);
+        }
+
+        setTimeout(rotateClients, 6000);
+
+        // Trigger width change when H swaps in
+        setTimeout(() => {
+            document.querySelector('.h-swap').classList.add('uppercase');
+            document.querySelector('.period').classList.add('visible');
+        }, 5750);
+    </script>
+</body>
+</html>
