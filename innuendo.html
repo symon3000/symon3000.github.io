@@ -32,16 +32,23 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px 20px;
+            /* reduce padding to avoid pushing the visual center off */
+            padding: 0;
             font-family: 'Inter', sans-serif;
             background: #fff;
             position: relative;
         }
 
+        /* Center the logo/tagline exactly in the viewport */
         .center-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             display: flex;
             flex-direction: column;
             align-items: center;
+            text-align: center;
         }
 
         .logo-container {
@@ -129,6 +136,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 50; /* keep below footer (footer z-index is higher) */
+            pointer-events: none; /* avoid accidental hover interactions behind footer */
         }
 
         .client-box {
@@ -138,6 +147,7 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            pointer-events: auto;
         }
 
         .client-logo {
@@ -187,7 +197,7 @@
             transform: translateX(-50%);
             display: flex;
             gap: 20px;
-            z-index: 100;
+            z-index: 200; /* ensure footer is above client logos */
             opacity: 0;
             transition: opacity 1s ease-in;
         }
@@ -219,6 +229,13 @@
                 padding-bottom: 10px;
             }
 
+            .center-content {
+                /* revert to document flow for mobile so layout flows naturally */
+                position: static;
+                transform: none;
+                margin-top: 10px;
+            }
+
             .logo-container {
                 height: 100px;
                 width: 90vw;
@@ -237,6 +254,7 @@
                 position: fixed;
                 top: 50%;
                 transform: translate(-50%, -50%);
+                left: 50%;
             }
 
             .footer {
@@ -284,16 +302,32 @@
 
     <script>
         function positionClientLogos() {
-            const tagline = document.querySelector('.tagline');
+            const center = document.querySelector('.center-content');
             const clientContainer = document.getElementById('clientContainer');
-            
+
+            if (!center || !clientContainer) return;
+
             if (window.innerWidth > 768) {
-                const taglineBottom = tagline.getBoundingClientRect().bottom;
+                const centerRect = center.getBoundingClientRect();
                 const windowHeight = window.innerHeight;
-                const spaceBelow = windowHeight - taglineBottom;
-                const midpoint = taglineBottom + (spaceBelow / 2);
-                
-                clientContainer.style.top = midpoint + 'px';
+                // midpoint between the bottom of the centered content and the bottom of the viewport
+                const midpoint = centerRect.bottom + ((windowHeight - centerRect.bottom) / 2);
+
+                // measure footer and client box so we can clamp to avoid overlap
+                const footer = document.querySelector('.footer');
+                const footerHeight = footer ? footer.getBoundingClientRect().height + 20 : 0; // include bottom spacing
+                const clientBox = clientContainer.querySelector('.client-box');
+                const clientBoxHeight = clientBox ? clientBox.getBoundingClientRect().height : 100;
+
+                // maximum top position so the client box stays above the footer with a small buffer
+                const maxTop = windowHeight - footerHeight - clientBoxHeight - 10;
+                // minimum top should be just below the centered content
+                const minTop = centerRect.bottom + 10;
+
+                // pick a top between min and max
+                const top = Math.min(Math.max(midpoint, minTop), Math.max(minTop, maxTop));
+
+                clientContainer.style.top = top + 'px';
             } else {
                 // Reset to CSS default for mobile
                 clientContainer.style.top = '';
@@ -320,13 +354,19 @@
 
         function rotateClients() {
             const currentClient = document.getElementById(clients[currentIndex]);
-            currentClient.classList.add('active');
-            
-            setTimeout(() => {
-                currentClient.classList.remove('active');
+            if (currentClient) {
+                currentClient.classList.add('active');
+                
+                setTimeout(() => {
+                    currentClient.classList.remove('active');
+                    currentIndex = (currentIndex + 1) % clients.length;
+                    setTimeout(rotateClients, 300);
+                }, 3000);
+            } else {
+                // in case element is missing, try again later
                 currentIndex = (currentIndex + 1) % clients.length;
                 setTimeout(rotateClients, 300);
-            }, 3000);
+            }
         }
 
         setTimeout(rotateClients, 6000);
@@ -335,6 +375,8 @@
         setTimeout(() => {
             document.querySelector('.h-swap').classList.add('uppercase');
             document.querySelector('.period').classList.add('visible');
+            // reposition clients after the H swap in case sizes changed
+            positionClientLogos();
         }, 5750);
     </script>
 </body>
